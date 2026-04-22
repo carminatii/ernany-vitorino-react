@@ -11,6 +11,7 @@ import Slider from "react-slick";
 import PropertyCard from '../components/PropertyCard';
 import { cn } from '../utils/cn';
 import Map from '../components/Map';
+import ernanyImg from "../assets/ernany.png";
 
 const SliderComponent = Slider.default || Slider;
 
@@ -188,7 +189,7 @@ const PropertyDetail = () => {
                   <div className="flex items-center gap-4 mb-8">
                     <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-secondary p-1 bg-white shadow-lg">
                       <img 
-                        src="/src/assets/ernany.png" 
+                        src={ernanyImg} 
                         alt="Ernany Vitorino"
                         className="w-full h-full object-cover rounded-full"
                       />

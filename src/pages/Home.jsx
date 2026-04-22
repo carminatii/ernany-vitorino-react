@@ -6,6 +6,7 @@ import SearchBar from '../components/SearchBar';
 import PropertyCard from '../components/PropertyCard';
 import { imoveis } from '../data/imoveis';
 import Slider from "react-slick";
+import ernanyImg from "../assets/ernany.png";
 
 const SliderComponent = Slider.default || Slider;
 
@@ -132,7 +133,7 @@ const Home = () => {
               <div className="aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl bg-white p-3 border border-gray-100 relative z-10">
                 <div className="w-full h-full rounded-2xl overflow-hidden bg-gray-50">
                   <img
-                    src="/src/assets/ernany.png"
+                    src={ernanyImg}
                     alt="Ernany Vitorino"
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
