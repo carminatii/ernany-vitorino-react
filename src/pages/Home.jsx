@@ -24,36 +24,36 @@ const Home = () => {
 
   const featuredProperties = imoveis.filter(item => item.destaque).slice(0, 3);
   
-  const testimonials = [
-    {
-      name: "Ricardo Oliveira",
-      role: "Empresário",
-      text: "O Ernany foi extremamente profissional e atencioso. Encontrou exatamente a cobertura que eu buscava na Praia do Morro.",
-      avatar: "https://i.pravatar.cc/150?u=ricardo"
-    },
-    {
-      name: "Mariana Costa",
-      role: "Advogada",
-      text: "Excelente atendimento! A transparência e o conhecimento do mercado de luxo em Guarapari fazem toda a diferença.",
-      avatar: "https://i.pravatar.cc/150?u=mariana"
-    },
-    {
-      name: "João Pedro Silva",
-      role: "Investidor",
-      text: "Melhor corretor da região. Negociação ágil e suporte completo em todas as etapas da compra.",
-      avatar: "https://i.pravatar.cc/150?u=joao"
-    }
-  ];
+  // const testimonials = [
+  //   {
+  //     name: "Ricardo Oliveira",
+  //     role: "Empresário",
+  //     text: "O Ernany foi extremamente profissional e atencioso. Encontrou exatamente a cobertura que eu buscava na Praia do Morro.",
+  //     avatar: "https://i.pravatar.cc/150?u=ricardo"
+  //   },
+  //   {
+  //     name: "Mariana Costa",
+  //     role: "Advogada",
+  //     text: "Excelente atendimento! A transparência e o conhecimento do mercado de luxo em Guarapari fazem toda a diferença.",
+  //     avatar: "https://i.pravatar.cc/150?u=mariana"
+  //   },
+  //   {
+  //     name: "João Pedro Silva",
+  //     role: "Investidor",
+  //     text: "Melhor corretor da região. Negociação ágil e suporte completo em todas as etapas da compra.",
+  //     avatar: "https://i.pravatar.cc/150?u=joao"
+  //   }
+  // ];
 
-  const sliderSettings = {
-    dots: true,
-    infinite: true,
-    speed: 500,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    autoplay: true,
-    arrows: false
-  };
+  // const sliderSettings = {
+  //   dots: true,
+  //   infinite: true,
+  //   speed: 500,
+  //   slidesToShow: 1,
+  //   slidesToScroll: 1,
+  //   autoplay: true,
+  //   arrows: false
+  // };
 
   return (
     <div className="overflow-hidden">
