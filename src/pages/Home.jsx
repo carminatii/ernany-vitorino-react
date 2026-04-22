@@ -129,7 +129,6 @@ const Home = () => {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div className="relative group">
-              {/* Frame sofisticado com fundo branco */}
               <div className="aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl bg-white p-3 border border-gray-100 relative z-10">
                 <div className="w-full h-full rounded-2xl overflow-hidden bg-gray-50">
                   <img
@@ -139,7 +138,6 @@ const Home = () => {
                   />
                 </div>
               </div>
-              {/* Elemento decorativo de fundo */}
               <div className="absolute -top-6 -left-6 w-32 h-32 bg-secondary/10 rounded-full blur-3xl -z-0"></div>
               <div className="absolute -bottom-10 -right-10 bg-secondary p-12 rounded-2xl hidden md:block z-20 shadow-xl">
                 <span className="block text-5xl font-serif text-primary font-bold mb-2">15+</span>
@@ -189,7 +187,7 @@ const Home = () => {
       </section>
 
       {/* Testimonials */}
-      <section className="py-24 bg-primary text-white">
+      {/* <section className="py-24 bg-primary text-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <Quote size={48} className="text-secondary mx-auto mb-6 opacity-50" />
@@ -216,7 +214,7 @@ const Home = () => {
             </SliderComponent>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* CTA Section */}
       <section className="py-24 bg-secondary relative overflow-hidden">
