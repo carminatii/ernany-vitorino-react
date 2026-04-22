@@ -92,7 +92,7 @@ const Home = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.4 }}
           >
-            <SearchBar />
+             {/* <SearchBar /> removido para simplificar  */}
           </motion.div>
         </div>
       </section>
