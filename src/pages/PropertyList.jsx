@@ -25,8 +25,8 @@ const PainelFiltros = ({ filters, onFilter, onLimpar }) => (
       </label>
       <div className="flex flex-wrap gap-2">
         {[
-          { label: 'Todos',   value: 'todos'   },
-          { label: 'Venda',   value: 'venda'   },
+          { label: 'Todos', value: 'todos' },
+          { label: 'Venda', value: 'venda' },
           { label: 'Aluguel', value: 'aluguel' },
         ].map(({ label, value }) => (
           <button key={value} onClick={() => onFilter('tipo', value)}
@@ -87,12 +87,12 @@ const PainelFiltros = ({ filters, onFilter, onLimpar }) => (
 )
 
 export default function PropertyList() {
-  const [imoveis, setImoveis]           = useState([])
-  const [loading, setLoading]           = useState(true)
-  const [erro, setErro]                 = useState(null)
-  const [filters, setFilters]           = useState(FILTROS_INICIAIS)
+  const [imoveis, setImoveis] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [erro, setErro] = useState(null)
+  const [filters, setFilters] = useState(FILTROS_INICIAIS)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
-  const [pagina, setPagina]             = useState(1)
+  const [pagina, setPagina] = useState(1)
 
   useEffect(() => {
     setLoading(true)
@@ -107,10 +107,10 @@ export default function PropertyList() {
   const filtrados = useMemo(() => {
     return imoveis
       .filter(item => {
-        const matchTipo       = filters.tipo === 'todos' || item.tipo === filters.tipo
+        const matchTipo = filters.tipo === 'todos' || item.tipo === filters.tipo
         const matchTipoImovel = filters.tipo_imovel === 'Todos' || item.tipo_imovel === filters.tipo_imovel
-        const matchLocal      = filters.localizacao === '' || item.localizacao?.toLowerCase().includes(filters.localizacao.toLowerCase())
-        const matchQuartos    = filters.quartos === 'Todos'
+        const matchLocal = filters.localizacao === '' || item.localizacao?.toLowerCase().includes(filters.localizacao.toLowerCase())
+        const matchQuartos = filters.quartos === 'Todos'
           || (filters.quartos === '4+' ? item.quartos >= 4 : item.quartos === parseInt(filters.quartos))
         return matchTipo && matchTipoImovel && matchLocal && matchQuartos
       })
@@ -122,7 +122,7 @@ export default function PropertyList() {
   }, [imoveis, filters])
 
   const totalPaginas = Math.ceil(filtrados.length / POR_PAGINA)
-  const paginados    = filtrados.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA)
+  const paginados = filtrados.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA)
 
   function handleFilter(name, value) {
     setFilters(prev => ({ ...prev, [name]: value }))
@@ -148,9 +148,24 @@ export default function PropertyList() {
     <div className="pt-32 pb-24 bg-light min-h-screen">
       <div className="container mx-auto px-4">
 
-        <div className="mb-12 text-center md:text-left">
-          <h1 className="text-4xl md:text-5xl font-serif text-primary mb-2">Nossos Imóveis</h1>
-          <p className="text-gray-500">{filtrados.length} imóveis encontrados</p>
+        {/* Page Header */}
+        <div className="mb-12 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-4xl md:text-5xl font-serif text-primary mb-2">Nossos Imóveis</h1>
+            <p className="text-gray-500">{filtrados.length} imóveis encontrados</p>
+          </div>
+          <div className="flex items-center gap-4 bg-white px-6 py-3 rounded-xl shadow-sm border border-gray-100 self-start md:self-auto">
+            <span className="text-sm text-gray-400 font-medium">ORDENAR POR:</span>
+            <select
+              value={filters.ordem}
+              onChange={(e) => handleFilter('ordem', e.target.value)}
+              className="bg-transparent font-bold text-primary focus:outline-none cursor-pointer"
+            >
+              <option value="recentes">Mais recentes</option>
+              <option value="menor_preco">Menor preço</option>
+              <option value="maior_preco">Maior preço</option>
+            </select>
+          </div>
         </div>
 
         {/* Barra mobile */}
@@ -189,18 +204,6 @@ export default function PropertyList() {
 
           {/* Grid */}
           <div className="flex-1">
-            <div className="hidden lg:flex justify-end mb-8">
-              <div className="flex items-center gap-4 bg-white px-6 py-3 rounded-xl shadow-sm border border-gray-100">
-                <span className="text-sm text-gray-400 font-medium">ORDENAR POR:</span>
-                <select value={filters.ordem} onChange={e => handleFilter('ordem', e.target.value)}
-                  className="bg-transparent font-bold text-primary focus:outline-none cursor-pointer">
-                  <option value="recentes">Mais recentes</option>
-                  <option value="menor_preco">Menor preço</option>
-                  <option value="maior_preco">Maior preço</option>
-                </select>
-              </div>
-            </div>
-
             {paginados.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {paginados.map(item => (
