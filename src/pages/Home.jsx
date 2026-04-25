@@ -1,63 +1,24 @@
-import React, { useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ArrowRight, CheckCircle2, Star, Quote } from 'lucide-react';
-import SearchBar from '../components/SearchBar';
-import PropertyCard from '../components/PropertyCard';
-import { imoveis } from '../data/imoveis';
-import Slider from "react-slick";
-import ernanyImg from "../assets/ernany.png";
-
-const SliderComponent = Slider.default || Slider;
+import React, { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { ArrowRight, CheckCircle2 } from 'lucide-react'
+import PropertyCard from '../components/PropertyCard'
+import { getImoveis } from '../services/imovelService'
+import ernanyImg from '../assets/ernany.png'
 
 const Home = () => {
-  const location = useLocation();
+  const [destaques, setDestaques] = useState([])
 
   useEffect(() => {
-    if (location.hash) {
-      const element = document.getElementById(location.hash.substring(1));
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
-  }, [location]);
-
-  const featuredProperties = imoveis.filter(item => item.destaque).slice(0, 3);
-  
-  // const testimonials = [
-  //   {
-  //     name: "Ricardo Oliveira",
-  //     role: "Empresário",
-  //     text: "O Ernany foi extremamente profissional e atencioso. Encontrou exatamente a cobertura que eu buscava na Praia do Morro.",
-  //     avatar: "https://i.pravatar.cc/150?u=ricardo"
-  //   },
-  //   {
-  //     name: "Mariana Costa",
-  //     role: "Advogada",
-  //     text: "Excelente atendimento! A transparência e o conhecimento do mercado de luxo em Guarapari fazem toda a diferença.",
-  //     avatar: "https://i.pravatar.cc/150?u=mariana"
-  //   },
-  //   {
-  //     name: "João Pedro Silva",
-  //     role: "Investidor",
-  //     text: "Melhor corretor da região. Negociação ágil e suporte completo em todas as etapas da compra.",
-  //     avatar: "https://i.pravatar.cc/150?u=joao"
-  //   }
-  // ];
-
-  // const sliderSettings = {
-  //   dots: true,
-  //   infinite: true,
-  //   speed: 500,
-  //   slidesToShow: 1,
-  //   slidesToScroll: 1,
-  //   autoplay: true,
-  //   arrows: false
-  // };
+    getImoveis()
+      .then(data => setDestaques(data.slice(0, 3)))
+      .catch(() => {})
+  }, [])
 
   return (
     <div className="overflow-hidden">
-      {/* Hero Section */}
+
+      {/* Hero */}
       <section className="relative h-screen flex items-center justify-center pt-20">
         <div className="absolute inset-0 z-0">
           <img
@@ -65,7 +26,7 @@ const Home = () => {
             alt="Luxury Real Estate"
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/40 to-primary/80"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/40 to-primary/80" />
         </div>
 
         <div className="container mx-auto px-4 relative z-10 text-center">
@@ -82,22 +43,14 @@ const Home = () => {
               <span className="text-secondary italic">em Guarapari</span>
             </h1>
             <p className="text-white/80 text-lg md:text-xl max-w-2xl mx-auto mb-12 font-light">
-              Curadoria exclusiva dos melhores imóveis no Espírito Santo. 
+              Curadoria exclusiva dos melhores imóveis no Espírito Santo.
               Experiência, segurança e sofisticação em cada detalhe.
             </p>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-          >
-             {/* <SearchBar /> removido para simplificar  */}
           </motion.div>
         </div>
       </section>
 
-      {/* Featured Properties */}
+      {/* Imóveis em Destaque */}
       <section className="py-24 bg-light">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
@@ -116,15 +69,21 @@ const Home = () => {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredProperties.map((property) => (
-              <PropertyCard key={property.id} property={property} />
-            ))}
-          </div>
+          {destaques.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {destaques.map(property => (
+                <PropertyCard key={property.id} property={property} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-16 text-gray-400">
+              Nenhum imóvel cadastrado ainda.
+            </div>
+          )}
         </div>
       </section>
 
-      {/* About Section */}
+      {/* Sobre */}
       <section id="sobre" className="py-24 bg-white relative overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -138,7 +97,7 @@ const Home = () => {
                   />
                 </div>
               </div>
-              <div className="absolute -top-6 -left-6 w-32 h-32 bg-secondary/10 rounded-full blur-3xl -z-0"></div>
+              <div className="absolute -top-6 -left-6 w-32 h-32 bg-secondary/10 rounded-full blur-3xl -z-0" />
               <div className="absolute -bottom-10 -right-10 bg-secondary p-12 rounded-2xl hidden md:block z-20 shadow-xl">
                 <span className="block text-5xl font-serif text-primary font-bold mb-2">15+</span>
                 <span className="text-primary/80 font-bold uppercase tracking-widest text-xs leading-tight">
@@ -154,20 +113,24 @@ const Home = () => {
                 </span>
                 <h2 className="text-4xl md:text-5xl font-serif text-primary mb-6">
                   Ernany Vitorino <br />
-                  <span className="text-2xl text-gray-400 font-sans font-light">Corretor de Imóveis - CRECI ES2661-F</span>
+                  <span className="text-2xl text-gray-400 font-sans font-light">
+                    Corretor de Imóveis - CRECI ES2661-F
+                  </span>
                 </h2>
                 <p className="text-gray-600 leading-relaxed text-lg">
-                  Com uma trajetória consolidada no mercado imobiliário de Guarapari, dedico meu trabalho a conectar pessoas a propriedades extraordinárias. Minha missão é oferecer um atendimento personalizado, pautado na ética, transparência e excelência.
+                  Com uma trajetória consolidada no mercado imobiliário de Guarapari, dedico meu trabalho
+                  a conectar pessoas a propriedades extraordinárias. Minha missão é oferecer um atendimento
+                  personalizado, pautado na ética, transparência e excelência.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {[
-                  "Especialista em Alto Padrão",
-                  "Atendimento Personalizado",
-                  "Consultoria de Investimentos",
-                  "Segurança Jurídica Total"
-                ].map((item) => (
+                  'Especialista em Alto Padrão',
+                  'Atendimento Personalizado',
+                  'Consultoria de Investimentos',
+                  'Segurança Jurídica Total'
+                ].map(item => (
                   <div key={item} className="flex items-center gap-3">
                     <CheckCircle2 className="text-secondary" size={24} />
                     <span className="font-medium text-primary">{item}</span>
@@ -186,44 +149,13 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Testimonials */}
-      {/* <section className="py-24 bg-primary text-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <Quote size={48} className="text-secondary mx-auto mb-6 opacity-50" />
-            <h2 className="text-4xl md:text-5xl font-serif mb-4">O que dizem os clientes</h2>
-            <p className="text-white/60">A satisfação de quem realizou o sonho do imóvel ideal</p>
-          </div>
-
-          <div className="max-w-4xl mx-auto">
-            <SliderComponent {...sliderSettings}>
-              {testimonials.map((t, index) => (
-                <div key={index} className="px-4 outline-none">
-                  <div className="text-center space-y-8">
-                    <p className="text-xl md:text-2xl font-serif italic leading-relaxed">
-                      "{t.text}"
-                    </p>
-                    <div className="flex flex-col items-center">
-                      <img src={t.avatar} alt={t.name} className="w-16 h-16 rounded-full mb-4 border-2 border-secondary p-1" />
-                      <h4 className="font-bold text-secondary">{t.name}</h4>
-                      <span className="text-sm text-white/40">{t.role}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </SliderComponent>
-          </div>
-        </div>
-      </section> */}
-
-      {/* CTA Section */}
+      {/* CTA */}
       <section className="py-24 bg-secondary relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/3 h-full opacity-10 pointer-events-none">
           <svg viewBox="0 0 100 100" className="w-full h-full">
             <path d="M0,0 L100,0 L100,100 Z" fill="white" />
           </svg>
         </div>
-        
         <div className="container mx-auto px-4 text-center relative z-10">
           <h2 className="text-4xl md:text-6xl font-serif text-primary mb-8">
             Pronto para encontrar seu <br className="hidden md:block" /> próximo endereço de luxo?
@@ -245,7 +177,7 @@ const Home = () => {
         </div>
       </section>
     </div>
-  );
-};
+  )
+}
 
-export default Home;
+export default Home

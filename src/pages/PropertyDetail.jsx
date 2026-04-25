@@ -1,82 +1,111 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { imoveis } from '../data/imoveis';
-import { 
-  BedDouble, Bath, Square, Car, MapPin, Share2, 
-  Heart, MessageCircle, ArrowLeft, CheckCircle2,
-  Calendar, Info
-} from 'lucide-react';
-import { motion } from 'framer-motion';
-import Slider from "react-slick";
-import PropertyCard from '../components/PropertyCard';
-import { cn } from '../utils/cn';
-import Map from '../components/Map';
-import ernanyImg from "../assets/ernany.png";
+import React, { useEffect, useState } from 'react'
+import { useParams, Link } from 'react-router-dom'
+import {
+  BedDouble, Bath, Square, Car, MapPin,
+  MessageCircle, ArrowLeft, CheckCircle2, Info
+} from 'lucide-react'
+import Slider from 'react-slick'
+import PropertyCard from '../components/PropertyCard'
+import Map from '../components/Map'
+import { getImovelById, getImoveis } from '../services/imovelService'
+import ernanyImg from '../assets/ernany.png'
 
-const SliderComponent = Slider.default || Slider;
+const SliderComponent = Slider.default || Slider
 
-const PropertyDetail = () => {
-  const { id } = useParams();
-  const [property, setProperty] = useState(null);
-  const [similarImoveis, setSimilarImoveis] = useState([]);
+const sliderSettings = {
+  dots: true,
+  infinite: true,
+  speed: 500,
+  slidesToShow: 1,
+  slidesToScroll: 1,
+  autoplay: true,
+  fade: true
+}
+
+export default function PropertyDetail() {
+  const { id } = useParams()
+
+  const [property, setProperty] = useState(null)
+  const [similares, setSimilares] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [erro, setErro] = useState('')
   const [formData, setFormData] = useState({
-    nome: '',
-    email: '',
-    telefone: '',
-    mensagem: ''
-  });
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Interesse no imóvel:', property.titulo, formData);
-    alert('Mensagem enviada! Ernany Vitorino entrará em contato em breve.');
-    setFormData({ nome: '', email: '', telefone: '', mensagem: '' });
-  };
+    nome: '', email: '', telefone: '', mensagem: ''
+  })
 
   useEffect(() => {
-    const found = imoveis.find(item => item.id === parseInt(id));
-    if (found) {
-      setProperty(found);
-      setSimilarImoveis(imoveis.filter(item => item.id !== found.id && item.tipo === found.tipo).slice(0, 3));
-      window.scrollTo(0, 0);
-    }
-  }, [id]);
+    setLoading(true)
+    setErro('')
+    window.scrollTo(0, 0)
 
-  if (!property) return <div className="pt-40 text-center">Carregando...</div>;
+    getImovelById(id)
+      .then(async (data) => {
+        setProperty(data)
+        // busca similares do mesmo tipo
+        const todos = await getImoveis(data.tipo)
+        setSimilares(todos.filter(item => item.id !== data.id).slice(0, 3))
+      })
+      .catch(() => setErro('Imóvel não encontrado.'))
+      .finally(() => setLoading(false))
+  }, [id])
 
-  const sliderSettings = {
-    dots: true,
-    infinite: true,
-    speed: 500,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    autoplay: true,
-    fade: true
-  };
+  function handleChange(e) {
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+  }
 
-  const whatsappMessage = encodeURIComponent(`Olá, tenho interesse no imóvel: ${property.titulo} (${window.location.href})`);
+  function handleSubmit(e) {
+    e.preventDefault()
+    alert('Mensagem enviada! Ernany Vitorino entrará em contato em breve.')
+    setFormData({ nome: '', email: '', telefone: '', mensagem: '' })
+  }
+
+  if (loading) return (
+    <div className="pt-40 text-center text-gray-400 text-lg">Carregando...</div>
+  )
+
+  if (erro || !property) return (
+    <div className="pt-40 text-center text-red-400 text-lg">{erro || 'Imóvel não encontrado.'}</div>
+  )
+
+  const {
+    nome, imagem, tipo, valor, quartos,
+    banheiros, tamanho, vagas,
+    descricao, caracteristicas, corretor,
+    localizacao
+  } = property
+
+  const caracteristicasList = caracteristicas
+    ? caracteristicas.split(',').map(c => c.trim()).filter(Boolean)
+    : []
+
+  const whatsappMessage = encodeURIComponent(
+    `Olá, tenho interesse no imóvel: ${nome} (${window.location.href})`
+  )
 
   return (
     <div className="pt-20 bg-white">
-      {/* Photo Gallery */}
+
+      {/* Galeria — usa imagem da API, com fallback */}
       <section className="relative h-[60vh] md:h-[80vh]">
-        <SliderComponent {...sliderSettings} className="h-full">
-          {property.fotos.map((foto, index) => (
-            <div key={index} className="h-[60vh] md:h-[80vh] outline-none">
-              <img
-                src={foto}
-                alt={`${property.titulo} - Foto ${index + 1}`}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          ))}
-        </SliderComponent>
-        
+        {imagem ? (
+          <SliderComponent {...sliderSettings} className="h-full">
+            {[imagem].map((foto, index) => (
+              <div key={index} className="h-[60vh] md:h-[80vh] outline-none">
+                <img
+                  src={foto}
+                  alt={`${nome} - Foto ${index + 1}`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ))}
+          </SliderComponent>
+        ) : (
+          <div className="w-full h-full bg-light flex items-center justify-center">
+            <Square size={64} className="text-gray-200" />
+          </div>
+        )}
+
         <div className="absolute top-8 left-8 z-10">
           <Link
             to="/imoveis"
@@ -90,106 +119,107 @@ const PropertyDetail = () => {
 
       <div className="container mx-auto px-4 md:px-6 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          {/* Main Content */}
+
+          {/* Conteúdo principal */}
           <div className="lg:col-span-2 space-y-12">
+
             {/* Header */}
             <div>
               <div className="flex flex-wrap items-center gap-4 mb-6">
-                <span className="bg-secondary text-primary px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest">
-                  {property.finalidade}
+                <span className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest ${tipo === 'venda' ? 'bg-secondary text-primary' : 'bg-primary text-white'
+                  }`}>
+                  {tipo === 'venda' ? 'Venda' : 'Aluguel'}
                 </span>
-                <span className="text-gray-400 flex items-center gap-1 text-sm">
-                  <MapPin size={16} />
-                  {property.bairro}, {property.cidade} - {property.estado}
-                </span>
+                {localizacao && (
+                  <span className="text-gray-400 flex items-center gap-1 text-sm">
+                    <MapPin size={16} />
+                    {localizacao}
+                  </span>
+                )}
               </div>
-              <h1 className="text-4xl md:text-5xl font-serif text-primary mb-6">{property.titulo}</h1>
+              <h1 className="text-4xl md:text-5xl font-serif text-primary mb-6">{nome}</h1>
               <div className="text-3xl font-bold text-secondary">
-                {property.preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                {Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                {tipo === 'aluguel' && (
+                  <span className="text-base text-gray-400 font-normal ml-2">/mês</span>
+                )}
               </div>
             </div>
 
-            {/* Features Grid */}
+            {/* Detalhes */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 p-8 bg-light rounded-2xl">
-              <div className="flex flex-col items-center gap-2 text-center">
-                <BedDouble size={28} className="text-secondary" />
-                <span className="text-xl font-bold text-primary">{property.quartos}</span>
-                <span className="text-xs text-gray-500 uppercase tracking-widest">Quartos</span>
-              </div>
-              <div className="flex flex-col items-center gap-2 text-center">
-                <Bath size={28} className="text-secondary" />
-                <span className="text-xl font-bold text-primary">{property.banheiros}</span>
-                <span className="text-xs text-gray-500 uppercase tracking-widest">Banheiros</span>
-              </div>
-              <div className="flex flex-col items-center gap-2 text-center">
-                <Square size={28} className="text-secondary" />
-                <span className="text-xl font-bold text-primary">{property.area}m²</span>
-                <span className="text-xs text-gray-500 uppercase tracking-widest">Área Total</span>
-              </div>
-              <div className="flex flex-col items-center gap-2 text-center">
-                <Car size={28} className="text-secondary" />
-                <span className="text-xl font-bold text-primary">{property.vagas}</span>
-                <span className="text-xs text-gray-500 uppercase tracking-widest">Vagas</span>
-              </div>
+              {[
+                { icon: BedDouble, label: 'Quartos', value: quartos ?? '—' },
+                { icon: Bath, label: 'Banheiros', value: banheiros ?? '—' },
+                { icon: Square, label: 'Área Total', value: tamanho ? `${tamanho}m²` : '—' },
+                { icon: Car, label: 'Vagas', value: vagas ?? '—' },
+              ].map(({ icon: Icon, label, value }) => (
+                <div key={label} className="flex flex-col items-center gap-2 text-center">
+                  <Icon size={28} className="text-secondary" />
+                  <span className="text-xl font-bold text-primary">{value}</span>
+                  <span className="text-xs text-gray-500 uppercase tracking-widest">{label}</span>
+                </div>
+              ))}
             </div>
 
-            {/* Description */}
-            <div>
-              <h3 className="text-2xl font-serif text-primary mb-6 border-b pb-4">Descrição do Imóvel</h3>
-              <p className="text-gray-600 leading-relaxed text-lg">
-                {property.descricao}
-              </p>
-            </div>
-
-            {/* Amenities (Mock) */}
-            <div>
-              <h3 className="text-2xl font-serif text-primary mb-6 border-b pb-4">Características</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[
-                  "Acabamento de luxo",
-                  "Ar condicionado",
-                  "Área gourmet",
-                  "Varanda com vista",
-                  "Mobiliado",
-                  "Segurança 24h"
-                ].map(item => (
-                  <div key={item} className="flex items-center gap-3 text-gray-600">
-                    <CheckCircle2 size={20} className="text-secondary" />
-                    <span>{item}</span>
-                  </div>
-                ))}
+            {/* Descrição */}
+            {descricao && (
+              <div>
+                <h3 className="text-2xl font-serif text-primary mb-6 border-b pb-4">
+                  Descrição do Imóvel
+                </h3>
+                <p className="text-gray-600 leading-relaxed text-lg">{descricao}</p>
               </div>
-            </div>
+            )}
 
-            {/* Location (Mock Map) */}
-            <div>
-              <h3 className="text-2xl font-serif text-primary mb-6 border-b pb-4">Localização</h3>
-              <div className="aspect-video bg-gray-100 rounded-2xl overflow-hidden relative">
-                <Map 
-                  center={[property.coordenadas.lat, property.coordenadas.lng]} 
-                  zoom={15}
-                  markers={[
-                    { 
-                      position: [property.coordenadas.lat, property.coordenadas.lng], 
-                      popup: property.titulo 
-                    }
-                  ]}
-                />
+            {/* Características */}
+            {caracteristicasList.length > 0 && (
+              <div>
+                <h3 className="text-2xl font-serif text-primary mb-6 border-b pb-4">
+                  Características
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {caracteristicasList.map(item => (
+                    <div key={item} className="flex items-center gap-3 text-gray-600">
+                      <CheckCircle2 size={20} className="text-secondary shrink-0" />
+                      <span>{item}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* Corretor */}
+            {corretor && (
+              <div className="bg-light rounded-2xl p-6 flex items-center gap-4">
+                <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-secondary shrink-0">
+                  <img
+                    src={ernanyImg}
+                    alt={corretor}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">
+                    Corretor Responsável
+                  </p>
+                  <p className="text-lg font-serif font-bold text-primary">{corretor}</p>
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Sidebar Contact */}
+          {/* Sidebar */}
           <aside className="lg:col-span-1">
             <div className="sticky top-32 space-y-6">
               <div className="bg-primary text-white p-8 rounded-2xl shadow-2xl overflow-hidden relative">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/10 rounded-full -mr-16 -mt-16" />
-                
+
                 <div className="relative z-10">
                   <div className="flex items-center gap-4 mb-8">
                     <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-secondary p-1 bg-white shadow-lg">
-                      <img 
-                        src={ernanyImg} 
+                      <img
+                        src={ernanyImg}
                         alt="Ernany Vitorino"
                         className="w-full h-full object-cover rounded-full"
                       />
@@ -201,48 +231,40 @@ const PropertyDetail = () => {
                   </div>
 
                   <form onSubmit={handleSubmit} className="space-y-4 mb-8">
-                    <input 
-                      type="text" 
-                      name="nome"
-                      value={formData.nome}
-                      onChange={handleChange}
-                      placeholder="Seu Nome"
-                      className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:border-secondary transition-colors"
-                      required
-                    />
-                    <input 
-                      type="email" 
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      placeholder="Seu E-mail"
-                      className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:border-secondary transition-colors"
-                      required
-                    />
-                    <input 
-                      type="tel" 
-                      name="telefone"
-                      value={formData.telefone}
-                      onChange={handleChange}
-                      placeholder="Seu Telefone"
-                      className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:border-secondary transition-colors"
-                      required
-                    />
-                    <textarea 
+                    {[
+                      { name: 'nome', type: 'text', placeholder: 'Seu Nome' },
+                      { name: 'email', type: 'email', placeholder: 'Seu E-mail' },
+                      { name: 'telefone', type: 'tel', placeholder: 'Seu Telefone' },
+                    ].map(({ name, type, placeholder }) => (
+                      <input
+                        key={name}
+                        type={type}
+                        name={name}
+                        value={formData[name]}
+                        onChange={handleChange}
+                        placeholder={placeholder}
+                        required
+                        className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:border-secondary transition-colors placeholder:text-white/40"
+                      />
+                    ))}
+                    <textarea
                       name="mensagem"
                       value={formData.mensagem}
                       onChange={handleChange}
                       placeholder="Mensagem"
-                      rows="4"
-                      className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:border-secondary transition-colors"
+                      rows={4}
                       required
-                    ></textarea>
-                    <button type="submit" className="w-full bg-secondary text-primary font-bold py-4 rounded-xl hover:bg-opacity-90 transition-all">
+                      className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:border-secondary transition-colors placeholder:text-white/40 resize-none"
+                    />
+                    <button
+                      type="submit"
+                      className="w-full bg-secondary text-primary font-bold py-4 rounded-xl hover:bg-opacity-90 transition-all"
+                    >
                       ENVIAR MENSAGEM
                     </button>
                   </form>
 
-                  <a 
+                  <a
                     href={`https://wa.me/5527999999999?text=${whatsappMessage}`}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -257,19 +279,20 @@ const PropertyDetail = () => {
               <div className="bg-light p-6 rounded-2xl border border-gray-100 flex items-start gap-4">
                 <Info className="text-secondary shrink-0" />
                 <p className="text-xs text-gray-500 leading-relaxed">
-                  Os valores e disponibilidades dos imóveis podem sofrer alterações sem aviso prévio. Entre em contato para confirmar as informações.
+                  Os valores e disponibilidades dos imóveis podem sofrer alterações sem aviso prévio.
+                  Entre em contato para confirmar as informações.
                 </p>
               </div>
             </div>
           </aside>
         </div>
 
-        {/* Similar Properties */}
-        {similarImoveis.length > 0 && (
+        {/* Similares */}
+        {similares.length > 0 && (
           <section className="mt-24 pt-24 border-t">
             <h2 className="text-3xl font-serif text-primary mb-12">Imóveis Similares</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {similarImoveis.map(item => (
+              {similares.map(item => (
                 <PropertyCard key={item.id} property={item} />
               ))}
             </div>
@@ -277,7 +300,5 @@ const PropertyDetail = () => {
         )}
       </div>
     </div>
-  );
-};
-
-export default PropertyDetail;
+  )
+}
