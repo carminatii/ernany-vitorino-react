@@ -115,7 +115,6 @@ export default function Admin() {
 
         <div className="mb-8">
           <h1 className="text-4xl font-serif font-bold text-primary">Cadastrar Imóvel</h1>
-          <p className="text-gray-400 mt-1">Bem-vindo, {sessao.usuario.nome}.</p>
         </div>
 
         {sucesso && (
@@ -148,7 +147,7 @@ export default function Admin() {
 
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">Imagem do imóvel</label>
-              <div className="flex gap-2 mb-3">
+              {/* <div className="flex gap-2 mb-3">
                 <button type="button" onClick={() => setModoFoto('url')}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${modoFoto === 'url' ? 'bg-primary text-white' : 'bg-light text-gray-500'}`}>
                   <Link size={14} /> Colar URL
@@ -157,7 +156,7 @@ export default function Admin() {
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${modoFoto === 'upload' ? 'bg-primary text-white' : 'bg-light text-gray-500'}`}>
                   <Image size={14} /> Upload
                 </button>
-              </div>
+              </div> */}
 
               {modoFoto === 'url' ? (
                 <input type="url" name="imagem" value={form.imagem} onChange={handleChange}

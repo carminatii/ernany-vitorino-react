@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react'
 import { loginUsuario, salvarSessao } from '../services/authService'
 
@@ -23,7 +23,12 @@ const Login = () => {
     try {
       const data = await loginUsuario(formData)
       salvarSessao(data.token, data.usuario)
-      navigate('/admin')
+
+      if (data.trocar_senha) {
+        navigate('/trocar-senha')
+      } else {
+        navigate('/admin')
+      }
     } catch (err) {
       setErro(err.message || 'Erro ao fazer login. Tente novamente.')
     } finally {
@@ -76,9 +81,17 @@ const Login = () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-widest text-gray-400">
-                  Senha
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold uppercase tracking-widest text-gray-400">
+                    Senha
+                  </label>
+                  <Link
+                    to="/esqueceu-senha"
+                    className="text-xs text-gray-400 hover:text-secondary transition-colors font-medium"
+                  >
+                    Esqueceu a senha?
+                  </Link>
+                </div>
                 <div className="relative">
                   <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" />
                   <input

@@ -11,6 +11,31 @@ export async function loginUsuario(dados) {
   return data
 }
 
+export async function esqueceuSenha(email) {
+  const response = await fetch(`${BASE_URL}/auth/esqueceu`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email })
+  })
+  const data = await response.json()
+  if (!response.ok) throw new Error(data.erro || 'Erro ao solicitar recuperação.')
+  return data
+}
+
+export async function trocarSenha(senha_atual, nova_senha) {
+  const response = await fetch(`${BASE_URL}/auth/trocar-senha`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${getToken()}`
+    },
+    body: JSON.stringify({ senha_atual, nova_senha })
+  })
+  const data = await response.json()
+  if (!response.ok) throw new Error(data.erro || 'Erro ao trocar senha.')
+  return data
+}
+
 export function salvarSessao(token, usuario) {
   localStorage.setItem('token', token)
   localStorage.setItem('usuario', JSON.stringify(usuario))
