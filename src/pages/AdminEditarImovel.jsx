@@ -1,41 +1,50 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { createImovel } from '../services/imovelService'
+import React, { useState, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { getImovelById, updateImovel } from '../services/imovelService'
 import {
   BedDouble, Bath, Square, Car, User, MapPin,
-  Home, ArrowLeft, X, Image, LogOut
+  Home, ArrowLeft, X, Image
 } from 'lucide-react'
 
-const camposIniciais = {
-  nome: '',
-  tipo_imovel: '',
-  tipo: 'venda',
-  valor: '',
-  quartos: '',
-  banheiros: '',
-  tamanho: '',
-  vagas: '',
-  descricao: '',
-  caracteristicas: '',
-  corretor: '',
-  localizacao: '',
-  imagem: '',
-}
-
-export default function Admin() {
+export default function AdminEditarImovel() {
   const navigate = useNavigate()
+  const { id } = useParams()
 
-  const [form, setForm] = useState(camposIniciais)
-  const [modoFoto, setModoFoto] = useState('url')
+  const [form, setForm] = useState(null)
   const [previewFoto, setPreviewFoto] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [sucesso, setSucesso] = useState(false)
   const [erro, setErro] = useState('')
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    getImovelById(id)
+      .then(data => {
+        setForm({
+          nome: data.nome ?? '',
+          tipo_imovel: data.tipo_imovel ?? '',
+          tipo: data.tipo ?? 'venda',
+          valor: data.valor ?? '',
+          quartos: data.quartos ?? '',
+          banheiros: data.banheiros ?? '',
+          tamanho: data.tamanho ?? '',
+          vagas: data.vagas ?? '',
+          descricao: data.descricao ?? '',
+          caracteristicas: data.caracteristicas ?? '',
+          corretor: data.corretor ?? '',
+          localizacao: data.localizacao ?? '',
+          imagem: data.imagem ?? '',
+        })
+        setPreviewFoto(data.imagem ?? '')
+      })
+      .catch(() => setErro('Não foi possível carregar os dados do imóvel.'))
+      .finally(() => setLoading(false))
+  }, [id])
 
   function handleChange(e) {
     const { name, value } = e.target
     setForm(prev => ({ ...prev, [name]: value }))
-    if (name === 'imagem' && modoFoto === 'url') setPreviewFoto(value)
+    if (name === 'imagem') setPreviewFoto(value)
   }
 
   function handleUpload(e) {
@@ -49,13 +58,6 @@ export default function Admin() {
     reader.readAsDataURL(file)
   }
 
-  function handleLimpar() {
-    setForm(camposIniciais)
-    setPreviewFoto('')
-    setSucesso(false)
-    setErro('')
-  }
-
   async function handleSubmit(e) {
     e.preventDefault()
     setEnviando(true)
@@ -63,7 +65,7 @@ export default function Admin() {
     setSucesso(false)
 
     try {
-      await createImovel({
+      await updateImovel(id, {
         ...form,
         valor: parseFloat(form.valor),
         quartos: parseInt(form.quartos),
@@ -72,14 +74,25 @@ export default function Admin() {
         vagas: parseInt(form.vagas),
       })
       setSucesso(true)
-      setForm(camposIniciais)
-      setPreviewFoto('')
+      window.scrollTo(0, 0)
     } catch (err) {
-      setErro(err.message || 'Erro ao cadastrar imóvel. Tente novamente.')
+      setErro(err.message || 'Erro ao atualizar imóvel. Tente novamente.')
     } finally {
       setEnviando(false)
     }
   }
+
+  if (loading) return (
+    <div className="pt-32 pb-24 bg-light min-h-screen flex items-center justify-center">
+      <p className="text-gray-400 text-lg">Carregando dados do imóvel...</p>
+    </div>
+  )
+
+  if (erro && !form) return (
+    <div className="pt-32 pb-24 bg-light min-h-screen flex items-center justify-center">
+      <p className="text-red-400 text-lg">{erro}</p>
+    </div>
+  )
 
   return (
     <div className="min-h-screen bg-light pt-24 pb-16 px-4">
@@ -87,20 +100,22 @@ export default function Admin() {
 
         <div className="flex justify-between items-center mb-6">
           <button
-            onClick={() => navigate('/admin')}
+            onClick={() => navigate('/admin/imoveis')}
             className="flex items-center gap-2 text-primary font-medium hover:opacity-70 transition-opacity"
           >
-            <ArrowLeft size={18} /> Voltar ao Dashboard
+            <ArrowLeft size={18} /> Voltar à listagem
           </button>
         </div>
 
         <div className="mb-8">
-          <h1 className="text-4xl font-serif font-bold text-primary">Cadastrar Imóvel</h1>
+          <span className="text-secondary font-bold uppercase tracking-widest text-sm mb-2 block">Painel Admin</span>
+          <h1 className="text-4xl font-serif font-bold text-primary">Editar Imóvel</h1>
+          <p className="text-gray-400 mt-1">Atualize os dados do imóvel abaixo.</p>
         </div>
 
         {sucesso && (
           <div className="bg-green-50 border border-green-200 text-green-700 rounded-xl p-4 mb-6 flex items-center justify-between">
-            <span className="font-medium">Imóvel cadastrado com sucesso!</span>
+            <span className="font-medium">Imóvel atualizado com sucesso!</span>
             <button onClick={() => setSucesso(false)}><X size={18} /></button>
           </div>
         )}
@@ -115,6 +130,7 @@ export default function Admin() {
         <form onSubmit={handleSubmit}>
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-6">
 
+            {/* Nome */}
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">
                 Nome do imóvel <span className="text-red-500">*</span>
@@ -126,23 +142,17 @@ export default function Admin() {
               />
             </div>
 
+            {/* Imagem */}
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">Imagem do imóvel</label>
-              {modoFoto === 'url' ? (
-                <input type="url" name="imagem" value={form.imagem} onChange={handleChange}
-                  placeholder="https://exemplo.com/foto.jpg"
-                  className="w-full bg-light p-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
-                />
-              ) : (
-                <label className="block border-2 border-dashed border-gray-200 rounded-xl p-8 text-center cursor-pointer hover:border-secondary transition-colors">
-                  <input type="file" accept="image/*" onChange={handleUpload} className="hidden" />
-                  <Image size={32} className="text-gray-300 mx-auto mb-2" />
-                  <p className="text-sm text-gray-400">Clique para selecionar uma imagem</p>
-                </label>
-              )}
+              <input
+                type="url" name="imagem" value={form.imagem} onChange={handleChange}
+                placeholder="https://exemplo.com/foto.jpg"
+                className="w-full bg-light p-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary mb-3"
+              />
 
               {previewFoto && (
-                <div className="mt-3 relative">
+                <div className="relative">
                   <img src={previewFoto} alt="Preview"
                     className="w-full h-48 object-cover rounded-xl"
                     onError={() => setPreviewFoto('')} />
@@ -155,6 +165,7 @@ export default function Admin() {
               )}
             </div>
 
+            {/* Tipo, Finalidade e Valor */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">Tipo do imóvel *</label>
@@ -188,6 +199,7 @@ export default function Admin() {
               </div>
             </div>
 
+            {/* Quartos, Banheiros, Tamanho, Vagas */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
                 { label: 'Quartos', name: 'quartos', icon: BedDouble, placeholder: 'Ex.: 3' },
@@ -208,6 +220,7 @@ export default function Admin() {
               ))}
             </div>
 
+            {/* Descrição */}
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">Descrição</label>
               <textarea name="descricao" value={form.descricao} onChange={handleChange}
@@ -216,6 +229,7 @@ export default function Admin() {
               />
             </div>
 
+            {/* Características */}
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">Características</label>
               <input type="text" name="caracteristicas" value={form.caracteristicas} onChange={handleChange}
@@ -224,6 +238,7 @@ export default function Admin() {
               />
             </div>
 
+            {/* Corretor e Localização */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">Corretor responsável</label>
@@ -247,15 +262,16 @@ export default function Admin() {
               </div>
             </div>
 
+            {/* Botões */}
             <div className="flex justify-end gap-3 pt-2">
-              <button type="button" onClick={handleLimpar}
+              <button type="button" onClick={() => navigate('/admin/imoveis')}
                 className="px-6 py-3 rounded-xl border border-gray-200 text-gray-500 font-bold text-sm hover:bg-light transition-colors">
-                Limpar
+                Cancelar
               </button>
               <button type="submit" disabled={enviando}
                 className="flex items-center gap-2 bg-primary text-white font-bold px-8 py-3 rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-60">
                 <Home size={16} />
-                {enviando ? 'Cadastrando...' : 'Cadastrar Imóvel'}
+                {enviando ? 'Salvando...' : 'Salvar Alterações'}
               </button>
             </div>
           </div>

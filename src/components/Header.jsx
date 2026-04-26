@@ -7,10 +7,10 @@ import { cn } from '../utils/cn'
 const ALTURA_HEADER = 80
 
 const Header = () => {
-  const [isOpen, setIsOpen]       = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
-  const location  = useLocation()
-  const navigate  = useNavigate()
+  const location = useLocation()
+  const navigate = useNavigate()
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50)
@@ -45,9 +45,10 @@ const Header = () => {
   const isHomePage = location.pathname === '/'
 
   const navLinks = [
-    { name: 'Início',  path: '/',        onClick: null },
+    { name: 'Início', path: '/', onClick: null },
     { name: 'Imóveis', path: '/imoveis', onClick: null },
-    { name: 'Sobre',   path: '/#sobre',  onClick: handleSobre },
+    { name: 'Sobre', path: '/#sobre', onClick: handleSobre },
+    { name: 'Localização', path: '/localizacao', onClick: null },
     { name: 'Contato', path: '/contato', onClick: null },
   ]
 
