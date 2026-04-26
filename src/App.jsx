@@ -12,7 +12,8 @@ import EsqueceuSenha from './pages/EsqueceuSenha'
 import TrocarSenha from './pages/TrocarSenha'
 import AdminDashboard from './pages/AdminDashboard'
 import AdminImoveis from './pages/AdminImoveis'
-import AdminConfiguracoes from './pages/AdminConfiguracoes'        
+import AdminConfiguracoes from './pages/AdminConfiguracoes'
+import AdminEditarImovel from './pages/AdminEditarImovel'        
 
 function App() {
   return (
@@ -30,7 +31,8 @@ function App() {
           <Route path="login" element={<Login />} />
           <Route path="cadastro-corretor" element={<CadastroCorretor />} /> // Cadastro de Corretor Admin
           <Route path="esqueceu-senha" element={<EsqueceuSenha />} />
-          <Route path="trocar-senha" element={<TrocarSenha />} /> 
+          <Route path="trocar-senha" element={<TrocarSenha />} />
+          <Route path="admin/editar/:id" element={<AdminEditarImovel />} />
         </Route>
       </Routes>
     </Router>
