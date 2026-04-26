@@ -36,9 +36,9 @@ const Home = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <span className="text-secondary uppercase tracking-[0.3em] font-bold text-sm mb-6 block">
+            {/* <span className="text-secondary uppercase tracking-[0.3em] font-bold text-sm mb-6 block">
               Especialista em Alto Padrão
-            </span>
+            </span> */}
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif text-white mb-8 leading-tight">
               Encontre seu lar ideal <br />
               <span className="text-secondary italic">em Guarapari</span>
@@ -108,7 +108,7 @@ const Home = () => {
               </div>
               <div className="absolute -top-6 -left-6 w-32 h-32 bg-secondary/10 rounded-full blur-3xl -z-0" />
               <div className="absolute -bottom-10 -right-10 bg-secondary p-12 rounded-2xl hidden md:block z-20 shadow-xl">
-                <span className="block text-5xl font-serif text-primary font-bold mb-2">15+</span>
+                <span className="block text-5xl font-serif text-primary font-bold mb-2">30+</span>
                 <span className="text-primary/80 font-bold uppercase tracking-widest text-xs leading-tight">
                   Anos de <br /> Experiência
                 </span>
@@ -124,6 +124,10 @@ const Home = () => {
                   Ernany Vitorino <br />
                   <span className="text-2xl text-gray-400 font-sans font-light">
                     Corretor de Imóveis - CRECI ES2661-F
+                  </span>
+                  <br />
+                  <span className="text-2xl text-gray-400 font-sans font-light">
+                    Perito Avaliador de Imóveis - CNAE 7120-2/00
                   </span>
                 </h2>
                 <p className="text-gray-600 leading-relaxed text-lg">
@@ -167,7 +171,7 @@ const Home = () => {
         </div>
         <div className="container mx-auto px-4 text-center relative z-10">
           <h2 className="text-4xl md:text-6xl font-serif text-primary mb-8">
-            Pronto para encontrar seu <br className="hidden md:block" /> próximo endereço de luxo?
+            Pronto para encontrar seu <br className="hidden md:block" /> próximo endereço?
           </h2>
           <div className="flex flex-col md:flex-row gap-4 justify-center">
             <a

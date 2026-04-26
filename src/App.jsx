@@ -13,7 +13,8 @@ import TrocarSenha from './pages/TrocarSenha'
 import AdminDashboard from './pages/AdminDashboard'
 import AdminImoveis from './pages/AdminImoveis'
 import AdminConfiguracoes from './pages/AdminConfiguracoes'
-import AdminEditarImovel from './pages/AdminEditarImovel'        
+import AdminEditarImovel from './pages/AdminEditarImovel'
+import Localizacao from './pages/Localizacao'        
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
           <Route path="esqueceu-senha" element={<EsqueceuSenha />} />
           <Route path="trocar-senha" element={<TrocarSenha />} />
           <Route path="admin/editar/:id" element={<AdminEditarImovel />} />
+          <Route path="localizacao" element={<Localizacao />} />
         </Route>
       </Routes>
     </Router>
