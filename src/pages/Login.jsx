@@ -109,7 +109,7 @@ const Login = () => {
               </div>
 
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
+                {/* <div className="flex items-center justify-between">
                   <label className="text-xs font-bold uppercase tracking-widest text-gray-400">
                     Senha
                   </label>
@@ -119,7 +119,7 @@ const Login = () => {
                   >
                     Esqueceu a senha?
                   </Link>
-                </div>
+                </div> */}
                 <div className="relative">
                   <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" />
                   <input

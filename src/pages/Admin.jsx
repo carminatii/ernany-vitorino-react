@@ -1,94 +1,161 @@
-import React, { useState, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { createImovel } from '../services/imovelService'
-import { getSessao } from '../services/authService'
+import React, { useState, useMemo, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { createImovel } from "../services/imovelService";
+import { getSessao } from "../services/authService";
+import { getUsuarios, getCorretores } from "../services/usuarioService";
+
 import {
-  BedDouble, Bath, Square, Car, User, MapPin,
-  Home, ArrowLeft, X, Image, LogOut
-} from 'lucide-react'
+  BedDouble,
+  Bath,
+  Square,
+  Car,
+  User,
+  MapPin,
+  Home,
+  ArrowLeft,
+  X,
+  Image,
+  LogOut,
+} from "lucide-react";
 
 const camposIniciais = {
-  nome: '',
-  referencia: '',
-  tipo_imovel: '',
-  tipo: 'venda',
-  valor: '',
-  quartos: '',
-  banheiros: '',
-  tamanho: '',
-  vagas: '',
-  descricao: '',
-  caracteristicas: '',
-  corretor: '',
-  localizacao: '',
-  imagem: '',
-}
+  nome: "",
+  referencia: "",
+  tipo_imovel: "",
+  tipo: "venda",
+  valor: "",
+  quartos: "",
+  banheiros: "",
+  tamanho: "",
+  vagas: "",
+  descricao: "",
+  caracteristicas: "",
+  corretor: "",
+  localizacao: "",
+  imagem: "",
+};
 
 export default function Admin() {
-  const navigate = useNavigate()
-  const sessao = useMemo(() => getSessao(), [])
-  const prefixo = sessao?.usuario?.papel === 'admin' ? '/admin' : '/corretor'
+  const navigate = useNavigate();
+  const sessao = useMemo(() => getSessao(), []);
+  const papel = String(sessao?.usuario?.papel || "").toLowerCase();
+  const usuarioId =
+    sessao?.usuario?.id !== undefined && sessao?.usuario?.id !== null
+      ? String(sessao.usuario.id)
+      : "";
+  const prefixo = papel === "admin" ? "/admin" : "/corretor";
 
-  const [form, setForm] = useState(camposIniciais)
-  const [modoFoto, setModoFoto] = useState('url')
-  const [previewFoto, setPreviewFoto] = useState('')
-  const [enviando, setEnviando] = useState(false)
-  const [sucesso, setSucesso] = useState(false)
-  const [erro, setErro] = useState('')
+  const [form, setForm] = useState(camposIniciais);
+  const [modoFoto, setModoFoto] = useState("url");
+  const [previewFoto, setPreviewFoto] = useState("");
+  const [enviando, setEnviando] = useState(false);
+  const [sucesso, setSucesso] = useState(false);
+  const [erro, setErro] = useState("");
+  const [corretores, setCorretores] = useState([]);
+  const [corretorSelecionado, setCorretorSelecionado] = useState(papel === 'admin' ? '' : usuarioId)
+    const nomeUsuario = sessao?.usuario?.nome;
+
+
+  useEffect(() => {
+    if (papel === "admin") {
+      // getUsuarios()
+      getCorretores()
+        .then((lista) => {
+          const dados = Array.isArray(lista)
+            ? lista
+            : (lista?.dados ?? lista ?? []);
+          const apenasCorretores = dados.filter(
+            (u) => String(u.papel || "").toLowerCase() === "corretor",
+          );
+          setCorretores(apenasCorretores);
+        })
+        .catch((err) => {
+          console.error("Erro ao carregar usuários:", err);
+        });
+    } else {
+      // se não for admin, garante que o corretor selecionado seja o próprio usuário
+      setCorretorSelecionado(usuarioId);
+      setForm((prev) => ({ ...prev, corretor: usuarioId }));
+    }
+  }, [papel, usuarioId]);
 
   function handleChange(e) {
-    const { name, value } = e.target
-    setForm(prev => ({ ...prev, [name]: value }))
-    if (name === 'imagem' && modoFoto === 'url') setPreviewFoto(value)
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+    if (name === "imagem" && modoFoto === "url") setPreviewFoto(value);
   }
 
   function handleUpload(e) {
-    const file = e.target.files[0]
-    if (!file) return
-    const reader = new FileReader()
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
     reader.onload = (ev) => {
-      setPreviewFoto(ev.target.result)
-      setForm(prev => ({ ...prev, imagem: ev.target.result }))
-    }
-    reader.readAsDataURL(file)
+      setPreviewFoto(ev.target.result);
+      setForm((prev) => ({ ...prev, imagem: ev.target.result }));
+    };
+    reader.readAsDataURL(file);
   }
 
   function handleLimpar() {
-    setForm(camposIniciais)
-    setPreviewFoto('')
-    setSucesso(false)
-    setErro('')
+    setForm(camposIniciais);
+    setPreviewFoto("");
+    setSucesso(false);
+    setErro("");
+
+    if (papel === "admin") {
+      setCorretorSelecionado("");
+    } else {
+      setCorretorSelecionado(usuarioId);
+      setForm((prev) => ({ ...prev, corretor: usuarioId }));
+    }
   }
 
   async function handleSubmit(e) {
-    e.preventDefault()
-    setEnviando(true)
-    setErro('')
-    setSucesso(false)
-
+    e.preventDefault();
+    setErro("");
+    setSucesso(false);
+    setEnviando(true);
     try {
-      await createImovel({
+      const payload = {
         ...form,
-        valor: parseFloat(form.valor),
-        quartos: parseInt(form.quartos),
-        banheiros: parseInt(form.banheiros),
-        tamanho: parseFloat(form.tamanho),
-        vagas: parseInt(form.vagas),
-      })
-      setSucesso(true)
-      setForm(camposIniciais)
-      setPreviewFoto('')
+        valor:
+          Number(String(form.valor).replace(/\D/g, "")) || Number(form.valor),
+        quartos: form.quartos ? Number(form.quartos) : undefined,
+        banheiros: form.banheiros ? Number(form.banheiros) : undefined,
+        tamanho: form.tamanho ? Number(form.tamanho) : undefined,
+        vagas: form.vagas ? Number(form.vagas) : undefined,
+      };
+
+      // if (papel === 'corretor') {
+      //   payload.corretor = usuarioId
+      // } else if (papel === 'admin') {
+      //   payload.corretor = corretorSelecionado && corretorSelecionado.trim() !== ''
+      //     ? corretorSelecionado
+      //     : null
+      // }
+
+      if (papel === 'corretor') {
+        payload.corretor = usuarioId;
+      } else {
+        payload.corretor = corretorSelecionado?.trim() || null;
+      }
+
+      await createImovel(payload);
+      setSucesso(true);
+      setTimeout(() => {
+        navigate(`${prefixo}/imoveis`);
+      }, 700);
     } catch (err) {
-      setErro(err.message || 'Erro ao cadastrar imóvel. Tente novamente.')
+      console.error("Erro ao criar imóvel:", err);
+      setErro(err?.message || "Erro ao cadastrar imóvel. Tente novamente.");
     } finally {
-      setEnviando(false)
+      setEnviando(false);
     }
   }
 
   return (
     <div className="min-h-screen bg-light pt-24 pb-16 px-4">
       <div className="max-w-3xl mx-auto">
-
         <div className="flex justify-between items-center mb-6">
           <button
             onClick={() => navigate(prefixo)}
@@ -99,77 +166,90 @@ export default function Admin() {
         </div>
 
         <div className="mb-8">
-          <h1 className="text-4xl font-serif font-bold text-primary">Cadastrar Imóvel</h1>
+          <h1 className="text-4xl font-serif font-bold text-primary">
+            Cadastrar Imóvel
+          </h1>
         </div>
 
         {sucesso && (
           <div className="bg-green-50 border border-green-200 text-green-700 rounded-xl p-4 mb-6 flex items-center justify-between">
             <span className="font-medium">Imóvel cadastrado com sucesso!</span>
-            <button onClick={() => setSucesso(false)}><X size={18} /></button>
+            <button onClick={() => setSucesso(false)}>
+              <X size={18} />
+            </button>
           </div>
         )}
 
         {erro && (
           <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl p-4 mb-6 flex items-center justify-between">
             <span>{erro}</span>
-            <button onClick={() => setErro('')}><X size={18} /></button>
+            <button onClick={() => setErro("")}>
+              <X size={18} />
+            </button>
           </div>
         )}
 
         <form onSubmit={handleSubmit}>
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-6">
-
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">
                 Nome do imóvel <span className="text-red-500">*</span>
               </label>
               <input
-                type="text" name="nome" value={form.nome} onChange={handleChange}
-                placeholder="Ex.: Apartamento no Centro" required
+                type="text"
+                name="nome"
+                value={form.nome}
+                onChange={handleChange}
+                placeholder="Ex.: Apartamento no Centro"
+                // required
                 className="w-full bg-light p-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
               />
             </div>
 
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">
-                Referência <span className="text-red-500">*</span>
+                Imagem do imóvel
               </label>
-              <input
-                type="text"
-                name="referencia"
-                value={form.referencia || ''}
-                disabled
-                placeholder="Gerada automaticamente (REF0000)"
-                className="w-full bg-gray-100 p-3 rounded-xl text-sm focus:outline-none text-gray-500 cursor-not-allowed"
-              />
-              <p className="text-xs text-gray-400 mt-1">
-                A referência é gerada automaticamente pelo sistema
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">Imagem do imóvel</label>
-              {modoFoto === 'url' ? (
-                <input type="url" name="imagem" value={form.imagem} onChange={handleChange}
+              {modoFoto === "url" ? (
+                <input
+                  type="url"
+                  name="imagem"
+                  value={form.imagem}
+                  onChange={handleChange}
                   placeholder="https://exemplo.com/foto.jpg"
                   className="w-full bg-light p-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
                 />
               ) : (
                 <label className="block border-2 border-dashed border-gray-200 rounded-xl p-8 text-center cursor-pointer hover:border-secondary transition-colors">
-                  <input type="file" accept="image/*" onChange={handleUpload} className="hidden" />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleUpload}
+                    className="hidden"
+                  />
                   <Image size={32} className="text-gray-300 mx-auto mb-2" />
-                  <p className="text-sm text-gray-400">Clique para selecionar uma imagem</p>
+                  <p className="text-sm text-gray-400">
+                    Clique para selecionar uma imagem
+                  </p>
                 </label>
               )}
 
               {previewFoto && (
                 <div className="mt-3 relative">
-                  <img src={previewFoto} alt="Preview"
+                  <img
+                    src={previewFoto}
+                    alt="Preview"
                     className="w-full h-48 object-cover rounded-xl"
-                    onError={() => setPreviewFoto('')} />
-                  <button type="button"
-                    onClick={() => { setPreviewFoto(''); setForm(prev => ({ ...prev, imagem: '' })) }}
-                    className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70">
+                    onError={() => setPreviewFoto("")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPreviewFoto("");
+                      setForm((prev) => ({ ...prev, imagem: "" }));
+                    }}
+                    className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70"
+                  >
                     <X size={14} />
                   </button>
                 </div>
@@ -178,9 +258,16 @@ export default function Admin() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Tipo do imóvel *</label>
-                <select name="tipo_imovel" value={form.tipo_imovel} onChange={handleChange} required
-                  className="w-full bg-light p-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary">
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Tipo do imóvel *
+                </label>
+                <select
+                  name="tipo_imovel"
+                  value={form.tipo_imovel}
+                  onChange={handleChange}
+                  // required
+                  className="w-full bg-light p-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
+                >
                   <option value="">Selecione</option>
                   <option value="Casa">Casa</option>
                   <option value="Apartamento">Apartamento</option>
@@ -190,38 +277,85 @@ export default function Admin() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Finalidade *</label>
-                <select name="tipo" value={form.tipo} onChange={handleChange} required
-                  className="w-full bg-light p-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary">
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Finalidade *
+                </label>
+                <select
+                  name="tipo"
+                  value={form.tipo}
+                  onChange={handleChange}
+                  // required
+                  className="w-full bg-light p-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
+                >
                   <option value="venda">Venda</option>
                   <option value="aluguel">Aluguel</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Valor (R$) *</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Valor (R$) *
+                </label>
                 <div className="relative">
-                  <input type="number" name="valor" value={form.valor} onChange={handleChange}
-                    placeholder="Ex.: 350000" required min="0"
+                  <input
+                    type="number"
+                    name="valor"
+                    value={form.valor}
+                    onChange={handleChange}
+                    placeholder="Ex.: 350000"
+                    // required
+                    min="0"
                     className="w-full bg-light p-3 pr-12 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-bold">R$</span>
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-bold">
+                    R$
+                  </span>
                 </div>
               </div>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { label: 'Quartos', name: 'quartos', icon: BedDouble, placeholder: 'Ex.: 3' },
-                { label: 'Banheiros', name: 'banheiros', icon: Bath, placeholder: 'Ex.: 2' },
-                { label: 'Tamanho (m²)', name: 'tamanho', icon: Square, placeholder: 'Ex.: 120' },
-                { label: 'Vagas', name: 'vagas', icon: Car, placeholder: 'Ex.: 1' },
+                {
+                  label: "Quartos",
+                  name: "quartos",
+                  icon: BedDouble,
+                  placeholder: "Ex.: 3",
+                },
+                {
+                  label: "Banheiros",
+                  name: "banheiros",
+                  icon: Bath,
+                  placeholder: "Ex.: 2",
+                },
+                {
+                  label: "Tamanho (m²)",
+                  name: "tamanho",
+                  icon: Square,
+                  placeholder: "Ex.: 120",
+                },
+                {
+                  label: "Vagas",
+                  name: "vagas",
+                  icon: Car,
+                  placeholder: "Ex.: 1",
+                },
               ].map(({ label, name, icon: Icon, placeholder }) => (
                 <div key={name}>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">{label}</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                    {label}
+                  </label>
                   <div className="relative">
-                    <Icon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" />
-                    <input type="number" name={name} value={form[name]} onChange={handleChange}
-                      placeholder={placeholder} min="0"
+                    <Icon
+                      size={16}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300"
+                    />
+                    <input
+                      type="number"
+                      name={name}
+                      value={form[name]}
+                      onChange={handleChange}
+                      placeholder={placeholder}
+                      min="0"
                       className="w-full bg-light p-3 pl-9 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
                     />
                   </div>
@@ -230,37 +364,73 @@ export default function Admin() {
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">Descrição</label>
-              <textarea name="descricao" value={form.descricao} onChange={handleChange}
-                placeholder="Descreva o imóvel..." rows={4}
+              <label className="block text-sm font-bold text-gray-700 mb-2">
+                Descrição
+              </label>
+              <textarea
+                name="descricao"
+                value={form.descricao}
+                onChange={handleChange}
+                placeholder="Descreva o imóvel..."
+                rows={4}
                 className="w-full bg-light p-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary resize-none"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">Características</label>
-              <input type="text" name="caracteristicas" value={form.caracteristicas} onChange={handleChange}
+              <label className="block text-sm font-bold text-gray-700 mb-2">
+                Características
+              </label>
+              <input
+                type="text"
+                name="caracteristicas"
+                value={form.caracteristicas}
+                onChange={handleChange}
                 placeholder="Ex.: Varanda, Churrasqueira, Piscina..."
                 className="w-full bg-light p-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Corretor responsável</label>
-                <div className="relative">
-                  <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" />
-                  <input type="text" name="corretor" value={form.corretor} onChange={handleChange}
-                    placeholder="Ex.: Ernany Vitorino"
-                    className="w-full bg-light p-3 pl-9 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
-                  />
+              {papel === "admin" && (
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                    Corretor responsável
+                  </label>
+                  <select
+                    value={corretorSelecionado}
+                    onChange={e => {
+                      setCorretorSelecionado(e.target.value)
+                      setForm(prev => ({ ...prev, corretor: e.target.value }))
+                    }}
+                    className="w-full bg-light p-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
+                  >
+                    {/* <option value="">Ficar comigo (admin)</option> */}
+                    <option value="">{nomeUsuario}</option>
+                    {corretores.map(c => (
+                      <option key={c.id} value={String(c.id)}>
+                        {c.nome}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-              </div>
+              )}
+
+
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Localização</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Localização
+                </label>
                 <div className="relative">
-                  <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" />
-                  <input type="text" name="localizacao" value={form.localizacao} onChange={handleChange}
+                  <MapPin
+                    size={16}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300"
+                  />
+                  <input
+                    type="text"
+                    name="localizacao"
+                    value={form.localizacao}
+                    onChange={handleChange}
                     placeholder="Ex.: Praia do Morro, Guarapari - ES"
                     className="w-full bg-light p-3 pl-9 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
                   />
@@ -269,19 +439,25 @@ export default function Admin() {
             </div>
 
             <div className="flex justify-end gap-3 pt-2">
-              <button type="button" onClick={handleLimpar}
-                className="px-6 py-3 rounded-xl border border-gray-200 text-gray-500 font-bold text-sm hover:bg-light transition-colors">
+              <button
+                type="button"
+                onClick={handleLimpar}
+                className="px-6 py-3 rounded-xl border border-gray-200 text-gray-500 font-bold text-sm hover:bg-light transition-colors"
+              >
                 Limpar
               </button>
-              <button type="submit" disabled={enviando}
-                className="flex items-center gap-2 bg-primary text-white font-bold px-8 py-3 rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-60">
+              <button
+                type="submit"
+                disabled={enviando}
+                className="flex items-center gap-2 bg-primary text-white font-bold px-8 py-3 rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-60"
+              >
                 <Home size={16} />
-                {enviando ? 'Cadastrando...' : 'Cadastrar Imóvel'}
+                {enviando ? "Cadastrando..." : "Cadastrar Imóvel"}
               </button>
             </div>
           </div>
         </form>
       </div>
     </div>
-  )
+  );
 }
