@@ -5,7 +5,7 @@ import { ArrowRight, CheckCircle2 } from 'lucide-react'
 import PropertyCard from '../components/PropertyCard'
 import { getImoveis } from '../services/imovelService'
 import ernanyImg from '../assets/ernany.png'
-import SearchBar from '../components/SearchBar'
+// import SearchBar from '../components/SearchBar'
 
 const Home = () => {
   const [destaques, setDestaques] = useState([])
@@ -53,7 +53,7 @@ const Home = () => {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.4 }}>
-            <SearchBar />
+            {/* <SearchBar /> */}
           </motion.div>
         </div>
 
