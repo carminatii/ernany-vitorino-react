@@ -1,8 +1,10 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react';
 import { Navigation } from 'lucide-react'
 import Map from '../components/Map'
 
 const COORDS = { lat: -20.6750, lng: -40.5007 }
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333';
 
 const fotos = [
   'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80',
@@ -10,7 +12,17 @@ const fotos = [
   'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=800&q=80',
 ]
 
+
+
 export default function Localizacao() {
+  const [config, setConfig] = useState(null)
+
+  useEffect(() => {
+    fetch(`${API_URL}/api/configuracoes`)
+      .then(res => res.json())
+      .then(json => { if (json.sucesso) setConfig(json.data) })
+      .catch(err => console.error('Erro ao carregar configurações:', err))
+  }, [])
   function abrirMaps() {
     window.open(
       `https://www.google.com/maps/dir/?api=1&destination=${COORDS.lat},${COORDS.lng}`,
@@ -39,7 +51,11 @@ export default function Localizacao() {
               <h2 className="text-3xl font-serif font-bold text-primary">Conheça nosso espaço</h2>
             </div>
             <p className="text-gray-400 text-sm hidden md:block">
-              R. Angélica Lucarelli Amaral, 24 — Centro, Guarapari/ES
+             <span>
+                  {config
+                    ? `${config.endereco} - ${config.cidade}`
+                    : '—'}
+                </span>
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -53,9 +69,6 @@ export default function Localizacao() {
               </div>
             ))}
           </div>
-          <p className="text-gray-400 text-sm mt-3 md:hidden text-center">
-            R. Angélica Lucarelli Amaral, 24 — Centro, Guarapari/ES
-          </p>
         </div>
 
         {/* Mapa */}

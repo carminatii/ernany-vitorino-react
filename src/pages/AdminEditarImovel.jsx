@@ -1,6 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { getImovelById, updateImovel } from '../services/imovelService'
+import { getSessao } from '../services/authService'
+import { getCorretores } from "../services/usuarioService"
+
 import {
   BedDouble, Bath, Square, Car, User, MapPin,
   Home, ArrowLeft, X, Image
@@ -10,12 +13,19 @@ export default function AdminEditarImovel() {
   const navigate = useNavigate()
   const { id } = useParams()
 
+  const sessao = useMemo(() => getSessao(), [])
+  const papel = String(sessao?.usuario?.papel || '').toLowerCase()
+  const usuarioId = String(sessao?.usuario?.id || '')
+
   const [form, setForm] = useState(null)
   const [previewFoto, setPreviewFoto] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [sucesso, setSucesso] = useState(false)
   const [erro, setErro] = useState('')
   const [loading, setLoading] = useState(true)
+  const nomeUsuario = sessao?.usuario?.nome;
+  const [corretores, setCorretores] = useState([])
+  const [corretorSelecionado, setCorretorSelecionado] = useState(usuarioId)
 
   useEffect(() => {
     getImovelById(id)
@@ -35,11 +45,46 @@ export default function AdminEditarImovel() {
           localizacao: data.localizacao ?? '',
           imagem: data.imagem ?? '',
         })
+
+        setCorretorSelecionado(String(data.corretor || ''))
         setPreviewFoto(data.imagem ?? '')
       })
       .catch(() => setErro('Não foi possível carregar os dados do imóvel.'))
       .finally(() => setLoading(false))
   }, [id])
+
+  useEffect(() => {
+    //   if (papel === 'admin') {
+    //     getCorretores().then(lista => {
+    //       const dados = Array.isArray(lista) ? lista : (lista?.dados ?? [])
+    //       setCorretores(dados)
+    //     })
+    //   } else {
+    //     setCorretorSelecionado(usuarioId)
+    //     setForm(prev => prev ? { ...prev, corretor: usuarioId } : prev)
+    //   }
+    // }, [papel, usuarioId])
+
+    if (papel === "admin") {
+      getCorretores()
+        .then((lista) => {
+          const dados = Array.isArray(lista)
+            ? lista
+            : (lista?.dados ?? lista ?? []);
+          const apenasCorretores = dados.filter(
+            (u) => String(u.papel || "").toLowerCase() === "corretor",
+          );
+          setCorretores(apenasCorretores);
+        })
+        .catch((err) => {
+          console.error("Erro ao carregar usuários:", err);
+        });
+    } else {
+      // se não for admin, garante que o corretor selecionado seja o próprio usuário
+      setCorretorSelecionado(usuarioId);
+      setForm((prev) => ({ ...prev, corretor: usuarioId }));
+    }
+  }, [papel, usuarioId]);
 
   function handleChange(e) {
     const { name, value } = e.target
@@ -65,16 +110,24 @@ export default function AdminEditarImovel() {
     setSucesso(false)
 
     try {
-      await updateImovel(id, {
+      const payload = {
         ...form,
         valor: parseFloat(form.valor),
-        quartos: parseInt(form.quartos),
-        banheiros: parseInt(form.banheiros),
-        tamanho: parseFloat(form.tamanho),
-        vagas: parseInt(form.vagas),
-      })
+        quartos: form.quartos ? parseInt(form.quartos) : undefined,
+        banheiros: form.banheiros ? parseInt(form.banheiros) : undefined,
+        tamanho: form.tamanho ? parseFloat(form.tamanho) : undefined,
+        vagas: form.vagas ? parseInt(form.vagas) : undefined,
+        corretor:
+          papel === 'corretor'
+            ? usuarioId
+            : (corretorSelecionado === '' ? undefined : corretorSelecionado),
+      }
+
+      await updateImovel(id, payload)
+
       setSucesso(true)
       window.scrollTo(0, 0)
+
     } catch (err) {
       setErro(err.message || 'Erro ao atualizar imóvel. Tente novamente.')
     } finally {
@@ -179,6 +232,7 @@ export default function AdminEditarImovel() {
                   <option value="Comercial">Comercial</option>
                 </select>
               </div>
+
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">Finalidade *</label>
                 <select name="tipo" value={form.tipo} onChange={handleChange} required
@@ -187,6 +241,7 @@ export default function AdminEditarImovel() {
                   <option value="aluguel">Aluguel</option>
                 </select>
               </div>
+
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">Valor (R$) *</label>
                 <div className="relative">
@@ -199,20 +254,19 @@ export default function AdminEditarImovel() {
               </div>
             </div>
 
-            {/* Quartos, Banheiros, Tamanho, Vagas */}
+            {/* Quartos etc */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { label: 'Quartos', name: 'quartos', icon: BedDouble, placeholder: 'Ex.: 3' },
-                { label: 'Banheiros', name: 'banheiros', icon: Bath, placeholder: 'Ex.: 2' },
-                { label: 'Tamanho (m²)', name: 'tamanho', icon: Square, placeholder: 'Ex.: 120' },
-                { label: 'Vagas', name: 'vagas', icon: Car, placeholder: 'Ex.: 1' },
-              ].map(({ label, name, icon: Icon, placeholder }) => (
+                { label: 'Quartos', name: 'quartos', icon: BedDouble },
+                { label: 'Banheiros', name: 'banheiros', icon: Bath },
+                { label: 'Tamanho (m²)', name: 'tamanho', icon: Square },
+                { label: 'Vagas', name: 'vagas', icon: Car },
+              ].map(({ label, name, icon: Icon }) => (
                 <div key={name}>
                   <label className="block text-sm font-bold text-gray-700 mb-2">{label}</label>
                   <div className="relative">
                     <Icon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" />
                     <input type="number" name={name} value={form[name]} onChange={handleChange}
-                      placeholder={placeholder} min="0"
                       className="w-full bg-light p-3 pl-9 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
                     />
                   </div>
@@ -221,59 +275,61 @@ export default function AdminEditarImovel() {
             </div>
 
             {/* Descrição */}
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">Descrição</label>
-              <textarea name="descricao" value={form.descricao} onChange={handleChange}
-                placeholder="Descreva o imóvel..." rows={4}
-                className="w-full bg-light p-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary resize-none"
-              />
-            </div>
+            <textarea name="descricao" value={form.descricao} onChange={handleChange}
+              className="w-full bg-light p-3 rounded-xl" />
 
             {/* Características */}
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">Características</label>
-              <input type="text" name="caracteristicas" value={form.caracteristicas} onChange={handleChange}
-                placeholder="Ex.: Varanda, Churrasqueira, Piscina..."
-                className="w-full bg-light p-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
-              />
-            </div>
+            <input type="text" name="caracteristicas" value={form.caracteristicas} onChange={handleChange}
+              className="w-full bg-light p-3 rounded-xl" />
 
-            {/* Corretor e Localização */}
+            {/* 🔥 REGRA AQUI */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Corretor responsável</label>
-                <div className="relative">
-                  <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" />
-                  <input type="text" name="corretor" value={form.corretor} onChange={handleChange}
-                    placeholder="Ex.: Ernany Vitorino"
-                    className="w-full bg-light p-3 pl-9 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
-                  />
+
+              {papel === 'admin' && (
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                    Corretor responsável
+                  </label>
+                  <select
+                    value={corretorSelecionado}
+                    onChange={e => {
+                      setCorretorSelecionado(e.target.value)
+                      setForm(prev => ({ ...prev, corretor: e.target.value }))
+                    }}
+                    className="w-full bg-light p-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
+                  >
+                    <option value="">{nomeUsuario}</option>
+                    {corretores.map(c => (
+                      <option key={c.id} value={String(c.id)}>
+                        {c.nome}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-              </div>
+              )}
+
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">Localização</label>
-                <div className="relative">
-                  <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" />
-                  <input type="text" name="localizacao" value={form.localizacao} onChange={handleChange}
-                    placeholder="Ex.: Praia do Morro, Guarapari - ES"
-                    className="w-full bg-light p-3 pl-9 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
-                  />
-                </div>
+                <input type="text" name="localizacao" value={form.localizacao} onChange={handleChange}
+                  className="w-full bg-light p-3 rounded-xl"
+                />
               </div>
             </div>
 
             {/* Botões */}
             <div className="flex justify-end gap-3 pt-2">
               <button type="button" onClick={() => navigate('/admin/imoveis')}
-                className="px-6 py-3 rounded-xl border border-gray-200 text-gray-500 font-bold text-sm hover:bg-light transition-colors">
+                className="px-6 py-3 rounded-xl border">
                 Cancelar
               </button>
+
               <button type="submit" disabled={enviando}
-                className="flex items-center gap-2 bg-primary text-white font-bold px-8 py-3 rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-60">
+                className="flex items-center gap-2 bg-primary text-white px-8 py-3 rounded-xl">
                 <Home size={16} />
                 {enviando ? 'Salvando...' : 'Salvar Alterações'}
               </button>
             </div>
+
           </div>
         </form>
       </div>
