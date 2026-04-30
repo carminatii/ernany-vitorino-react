@@ -58,7 +58,6 @@ export default function Admin() {
 
   useEffect(() => {
     if (papel === "admin") {
-      // getUsuarios()
       getCorretores()
         .then((lista) => {
           const dados = Array.isArray(lista)
@@ -125,14 +124,6 @@ export default function Admin() {
         tamanho: form.tamanho ? Number(form.tamanho) : undefined,
         vagas: form.vagas ? Number(form.vagas) : undefined,
       };
-
-      // if (papel === 'corretor') {
-      //   payload.corretor = usuarioId
-      // } else if (papel === 'admin') {
-      //   payload.corretor = corretorSelecionado && corretorSelecionado.trim() !== ''
-      //     ? corretorSelecionado
-      //     : null
-      // }
 
       if (papel === 'corretor') {
         payload.corretor = usuarioId;
