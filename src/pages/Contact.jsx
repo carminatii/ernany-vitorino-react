@@ -1,5 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { MapPin, Phone, Mail, Instagram, Facebook, MessageCircle } from 'lucide-react'
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333'
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -8,18 +10,27 @@ const Contact = () => {
     telefone: '',
     assunto: 'Comprar Imóvel',
     mensagem: ''
-  });
+  })
+
+  const [config, setConfig] = useState(null)
+
+  useEffect(() => {
+    fetch(`${API_URL}/api/configuracoes`)
+      .then(res => res.json())
+      .then(json => { if (json.sucesso) setConfig(json.data) })
+      .catch(err => console.error('Erro ao carregar configurações:', err))
+  }, [])
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+  }
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    alert('Mensagem enviada com sucesso! Em breve entraremos em contato.');
-    setFormData({ nome: '', email: '', telefone: '', assunto: 'Comprar Imóvel', mensagem: '' });
-  };
+    e.preventDefault()
+    alert('Mensagem enviada com sucesso! Em breve entraremos em contato.')
+    setFormData({ nome: '', email: '', telefone: '', assunto: 'Comprar Imóvel', mensagem: '' })
+  }
 
   return (
     <div className="pt-32 pb-24 bg-white min-h-screen">
@@ -43,39 +54,55 @@ const Contact = () => {
               </div>
               <h3 className="text-xl font-serif font-bold text-primary">Endereço</h3>
               <p className="text-gray-500">
-                Rua Joaquim da Silva Lima, 595<br />
-                Centro - Guarapari/ES<br />
-                CEP: 29200-260
+                {config?.endereco || '—'}<br />
+                {config?.cidade || ''}<br />
+                {config?.cep || ''}
               </p>
             </div>
+
             <div className="space-y-4">
               <div className="w-12 h-12 bg-light rounded-xl flex items-center justify-center text-secondary">
                 <Phone size={24} />
               </div>
               <h3 className="text-xl font-serif font-bold text-primary">Telefone</h3>
               <p className="text-gray-500">
-                (27) 3333-3333<br />
-                (27) 99999-9999
+                {config?.telefone1 || '—'}<br />
+                {config?.telefone2 || ''}
               </p>
             </div>
+
             <div className="space-y-4">
               <div className="w-12 h-12 bg-light rounded-xl flex items-center justify-center text-secondary">
                 <Mail size={24} />
               </div>
               <h3 className="text-xl font-serif font-bold text-primary">E-mail</h3>
               <p className="text-gray-500">
-                contato@ernanyvitorino.com.br<br />
-                vendas@ernanyvitorino.com.br
+                {config?.email1 || '—'}<br />
+                {config?.email2 || ''}
               </p>
             </div>
+
             <div className="space-y-4">
               <div className="w-12 h-12 bg-light rounded-xl flex items-center justify-center text-secondary">
                 <MessageCircle size={24} />
               </div>
               <h3 className="text-xl font-serif font-bold text-primary">Social</h3>
               <div className="flex gap-4">
-                <a href="#" className="text-gray-400 hover:text-secondary transition-colors"><Instagram size={20} /></a>
-                <a href="#" className="text-gray-400 hover:text-secondary transition-colors"><Facebook size={20} /></a>
+                {config?.instagram && (
+                  <a href={config.instagram} target="_blank" rel="noopener noreferrer"
+                    className="text-gray-400 hover:text-secondary transition-colors">
+                    <Instagram size={20} />
+                  </a>
+                )}
+                {config?.facebook && (
+                  <a href={config.facebook} target="_blank" rel="noopener noreferrer"
+                    className="text-gray-400 hover:text-secondary transition-colors">
+                    <Facebook size={20} />
+                  </a>
+                )}
+                {!config?.instagram && !config?.facebook && (
+                  <span className="text-gray-400 text-sm">—</span>
+                )}
               </div>
             </div>
           </div>
