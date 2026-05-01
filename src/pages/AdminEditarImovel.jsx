@@ -26,7 +26,7 @@ export default function AdminEditarImovel() {
   const [loading, setLoading] = useState(true)
   const nomeUsuario = sessao?.usuario?.nome;
   const [corretores, setCorretores] = useState([])
-  const [corretorSelecionado, setCorretorSelecionado] = useState(usuarioId)
+  const [corretorSelecionado, setCorretorSelecionado] = useState('')
 
   useEffect(() => {
     getImovelById(id)
@@ -48,7 +48,12 @@ export default function AdminEditarImovel() {
           imagem: data.imagem ?? '',
         })
 
-        setCorretorSelecionado(String(data.corretor || ''))
+        setCorretorSelecionado(
+          data.corretor !== null && data.corretor !== undefined
+            ? String(data.corretor)
+            : ''
+        )
+
         setPreviewFoto(data.imagem ?? '')
       })
       .catch(() => setErro('Não foi possível carregar os dados do imóvel.'))
@@ -56,17 +61,6 @@ export default function AdminEditarImovel() {
   }, [id])
 
   useEffect(() => {
-    //   if (papel === 'admin') {
-    //     getCorretores().then(lista => {
-    //       const dados = Array.isArray(lista) ? lista : (lista?.dados ?? [])
-    //       setCorretores(dados)
-    //     })
-    //   } else {
-    //     setCorretorSelecionado(usuarioId)
-    //     setForm(prev => prev ? { ...prev, corretor: usuarioId } : prev)
-    //   }
-    // }, [papel, usuarioId])
-
     if (papel === "admin") {
       getCorretores()
         .then((lista) => {
@@ -119,10 +113,15 @@ export default function AdminEditarImovel() {
         banheiros: form.banheiros ? parseInt(form.banheiros) : undefined,
         tamanho: form.tamanho ? parseFloat(form.tamanho) : undefined,
         vagas: form.vagas ? parseInt(form.vagas) : undefined,
-        corretor:
-          papel === 'corretor'
-            ? usuarioId
-            : (corretorSelecionado === '' ? undefined : corretorSelecionado),
+      }
+
+      if (papel === 'admin') {
+        if (String(form.corretor ?? '') !== String(corretorSelecionado ?? '')) {
+          payload.corretor =
+            corretorSelecionado === ''
+              ? Number(usuarioId)
+              : Number(corretorSelecionado)
+        }
       }
 
       await updateImovel(id, payload)
@@ -196,16 +195,6 @@ export default function AdminEditarImovel() {
                 className="w-full bg-light p-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
               />
             </div>
-
-            {/* {form.referencia && (
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Código de Referência</label>
-                <div 
-                className="w-full bg-light p-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary">
-                  <input type="text" value={form.referencia} disabled className="bg-transparent flex-1" />
-                </div>
-              </div>
-            )} */}
 
             {/* Imagem */}
             <div>
@@ -303,14 +292,11 @@ export default function AdminEditarImovel() {
                     Corretor responsável
                   </label>
                   <select
-                    value={corretorSelecionado}
-                    onChange={e => {
-                      setCorretorSelecionado(e.target.value)
-                      setForm(prev => ({ ...prev, corretor: e.target.value }))
-                    }}
-                    className="w-full bg-light p-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
+                    value={corretorSelecionado ?? ''}
+                    onChange={(e) => setCorretorSelecionado(e.target.value)}
                   >
-                    <option value="">{nomeUsuario}</option>
+                    <option value="">Sem corretor</option>
+
                     {corretores.map(c => (
                       <option key={c.id} value={String(c.id)}>
                         {c.nome}
