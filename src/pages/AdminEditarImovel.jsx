@@ -16,6 +16,7 @@ export default function AdminEditarImovel() {
   const sessao = useMemo(() => getSessao(), [])
   const papel = String(sessao?.usuario?.papel || '').toLowerCase()
   const usuarioId = String(sessao?.usuario?.id || '')
+  const prefixo = papel === 'admin' ? '/admin' : '/corretor'
 
   const [form, setForm] = useState(null)
   const [previewFoto, setPreviewFoto] = useState('')
@@ -32,6 +33,7 @@ export default function AdminEditarImovel() {
       .then(data => {
         setForm({
           nome: data.nome ?? '',
+          referencia: data.referencia ?? '',
           tipo_imovel: data.tipo_imovel ?? '',
           tipo: data.tipo ?? 'venda',
           valor: data.valor ?? '',
@@ -153,7 +155,7 @@ export default function AdminEditarImovel() {
 
         <div className="flex justify-between items-center mb-6">
           <button
-            onClick={() => navigate('/admin/imoveis')}
+            onClick={() => navigate(`${prefixo}/imoveis`)}
             className="flex items-center gap-2 text-primary font-medium hover:opacity-70 transition-opacity"
           >
             <ArrowLeft size={18} /> Voltar à listagem
@@ -194,6 +196,18 @@ export default function AdminEditarImovel() {
                 className="w-full bg-light p-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
               />
             </div>
+
+            {/* Referência (somente leitura) */}
+            {form.referencia && (
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Código de Referência</label>
+                <div className="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl text-sm text-gray-500 font-mono flex items-center gap-2">
+                  <span className="text-gray-400 text-xs uppercase tracking-widest font-sans">Ref:</span>
+                  {form.referencia}
+                  <span className="ml-auto text-xs text-gray-400 italic font-sans">gerado automaticamente</span>
+                </div>
+              </div>
+            )}
 
             {/* Imagem */}
             <div>
@@ -318,7 +332,7 @@ export default function AdminEditarImovel() {
 
             {/* Botões */}
             <div className="flex justify-end gap-3 pt-2">
-              <button type="button" onClick={() => navigate('/admin/imoveis')}
+              <button type="button" onClick={() => navigate(`${prefixo}/imoveis`)}
                 className="px-6 py-3 rounded-xl border">
                 Cancelar
               </button>
