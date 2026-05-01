@@ -138,7 +138,7 @@ export default function PropertyDetail() {
                 )}
                 {referencia && (
                   <span className="text-gray-400 text-xs font-mono bg-light px-3 py-1 rounded-full border border-gray-200">
-                    Ref: {referencia}
+                  {referencia}
                   </span>
                 )}
               </div>

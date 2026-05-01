@@ -115,7 +115,7 @@ export default function AdminImoveis() {
               className="w-full bg-light border border-gray-100 rounded-xl px-4 py-3 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
             />
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg>
             </span>
             {buscaRef && (
               <button onClick={() => setBuscaRef('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">✕</button>
@@ -138,75 +138,74 @@ export default function AdminImoveis() {
           ) : (
             <div className="space-y-4">
               {imoveisFiltrados.map(item => (
-              <div key={item.id}
-                className="bg-light rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center hover:shadow-md transition-shadow">
+                <div key={item.id}
+                  className="bg-light rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center hover:shadow-md transition-shadow">
 
-                <img
-                  src={item.imagem || 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=200&q=80'}
-                  alt={item.nome}
-                  className="w-full sm:w-32 h-24 object-cover rounded-xl flex-shrink-0"
-                  onError={e => e.target.src = 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=200&q=80'}
-                />
+                  <img
+                    src={item.imagem || 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=200&q=80'}
+                    alt={item.nome}
+                    className="w-full sm:w-32 h-24 object-cover rounded-xl flex-shrink-0"
+                    onError={e => e.target.src = 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=200&q=80'}
+                  />
 
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-serif font-bold text-primary truncate">{item.nome}</h3>
-                  <p className="text-sm text-gray-500 mt-1">{item.localizacao}</p>
-                  {item.referencia && (
-                    <span className="inline-block mt-1 text-xs font-mono text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
-                      Ref: {item.referencia}
-                    </span>
-                  )}
-                  <p className="text-sm text-gray-400 mt-1">
-                    {Number(item.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                    {' · '}
-                    {item.criado_em ? new Date(item.criado_em).toLocaleDateString('pt-BR') : ''}
-                  </p>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg font-serif font-bold text-primary truncate">{item.nome}</h3>
+                    <p className="text-sm text-gray-500 mt-1">{item.localizacao} - {item.referencia} </p>
+                    {/* {item.referencia && (
+                      <span className="inline-block mt-1 text-xs font-mono text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+                        {item.referencia}
+                      </span>
+                    )} */}
+                    {/* <p className="text-sm text-gray-400 mt-1"> */}
+                    <p>
+                      {Number(item.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    </p>
+                  </div>
+
+                  <div className="flex gap-3 flex-shrink-0">
+                    {confirmando === item.id ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-500">Confirmar?</span>
+                        <button onClick={() => handleExcluir(item.id)}
+                          className="bg-red-500 text-white text-sm font-bold px-4 py-2 rounded-xl hover:bg-red-600 transition-colors">
+                          Sim
+                        </button>
+                        <button onClick={() => setConfirmando(null)}
+                          className="bg-white border border-gray-200 text-gray-500 text-sm font-bold px-4 py-2 rounded-xl hover:bg-gray-100 transition-colors">
+                          Não
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        {podeEditarOuDeletar(item) ? (
+                          <>
+                            <button
+                              onClick={() => navigate(`${prefixo}/editar/${item.id}`)}
+                              className="flex flex-col items-center gap-1 border-2 border-blue-400 text-blue-400 rounded-xl p-3 hover:bg-blue-50 transition-colors"
+                            >
+                              <Pencil size={18} />
+                              <span className="text-[10px] font-bold uppercase tracking-wider">Editar</span>
+                            </button>
+                            <button
+                              onClick={() => setConfirmando(item.id)}
+                              className="flex flex-col items-center gap-1 border-2 border-red-400 text-red-400 rounded-xl p-3 hover:bg-red-50 transition-colors"
+                            >
+                              <Trash2 size={18} />
+                              <span className="text-[10px] font-bold uppercase tracking-wider">Remover</span>
+                            </button>
+                          </>
+                        ) : (
+                          <div className="flex items-center text-sm text-gray-400 px-3 py-2 rounded-xl border border-gray-100">
+                            Sem permissão
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
                 </div>
-
-                <div className="flex gap-3 flex-shrink-0">
-                  {confirmando === item.id ? (
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-500">Confirmar?</span>
-                      <button onClick={() => handleExcluir(item.id)}
-                        className="bg-red-500 text-white text-sm font-bold px-4 py-2 rounded-xl hover:bg-red-600 transition-colors">
-                        Sim
-                      </button>
-                      <button onClick={() => setConfirmando(null)}
-                        className="bg-white border border-gray-200 text-gray-500 text-sm font-bold px-4 py-2 rounded-xl hover:bg-gray-100 transition-colors">
-                        Não
-                      </button>
-                    </div>
-                  ) : (
-                    <>
-                      {podeEditarOuDeletar(item) ? (
-                        <>
-                          <button
-                            onClick={() => navigate(`${prefixo}/editar/${item.id}`)}
-                            className="flex flex-col items-center gap-1 border-2 border-blue-400 text-blue-400 rounded-xl p-3 hover:bg-blue-50 transition-colors"
-                          >
-                            <Pencil size={18} />
-                            <span className="text-[10px] font-bold uppercase tracking-wider">Editar</span>
-                          </button>
-                          <button
-                            onClick={() => setConfirmando(item.id)}
-                            className="flex flex-col items-center gap-1 border-2 border-red-400 text-red-400 rounded-xl p-3 hover:bg-red-50 transition-colors"
-                          >
-                            <Trash2 size={18} />
-                            <span className="text-[10px] font-bold uppercase tracking-wider">Remover</span>
-                          </button>
-                        </>
-                      ) : (
-                        <div className="flex items-center text-sm text-gray-400 px-3 py-2 rounded-xl border border-gray-100">
-                          Sem permissão
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )
+              ))}
+            </div>
+          )
         })()}
       </div>
     </div>

@@ -164,7 +164,7 @@ export default function AdminEditarImovel() {
 
         <div className="mb-8">
           <span className="text-secondary font-bold uppercase tracking-widest text-sm mb-2 block">Painel Admin</span>
-          <h1 className="text-4xl font-serif font-bold text-primary">Editar Imóvel</h1>
+          <h1 className="text-4xl font-serif font-bold text-primary">Editar Imóvel - {form.referencia}</h1>
           <p className="text-gray-400 mt-1">Atualize os dados do imóvel abaixo.</p>
         </div>
 
@@ -197,17 +197,15 @@ export default function AdminEditarImovel() {
               />
             </div>
 
-            {/* Referência (somente leitura) */}
-            {form.referencia && (
+            {/* {form.referencia && (
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">Código de Referência</label>
-                <div className="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl text-sm text-gray-500 font-mono flex items-center gap-2">
-                  <span className="text-gray-400 text-xs uppercase tracking-widest font-sans">Ref:</span>
-                  {form.referencia}
-                  <span className="ml-auto text-xs text-gray-400 italic font-sans">gerado automaticamente</span>
+                <div 
+                className="w-full bg-light p-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary">
+                  <input type="text" value={form.referencia} disabled className="bg-transparent flex-1" />
                 </div>
               </div>
-            )}
+            )} */}
 
             {/* Imagem */}
             <div>
