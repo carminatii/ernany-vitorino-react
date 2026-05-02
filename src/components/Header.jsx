@@ -18,7 +18,6 @@ const Header = () => {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // Fecha o menu mobile ao trocar de rota
   useEffect(() => { setIsOpen(false) }, [location])
 
   function scrollParaSecao(id) {
@@ -32,10 +31,8 @@ const Header = () => {
   function handleSobre(e) {
     e.preventDefault()
     if (location.pathname === '/') {
-      // já está na home, só scrolla
       scrollParaSecao('sobre')
     } else {
-      // navega para home e scrolla depois que carregar
       navigate('/')
       setTimeout(() => scrollParaSecao('sobre'), 300)
     }
@@ -64,7 +61,6 @@ const Header = () => {
     )}>
       <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
 
-        {/* Logo — sempre volta para home */}
         <Link
           to="/"
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
@@ -75,7 +71,6 @@ const Header = () => {
           </div>
         </Link>
 
-        {/* Desktop Nav */}
         <nav className="hidden lg:flex items-center gap-8">
           {navLinks.map((link) => (
             link.onClick ? (
@@ -111,13 +106,11 @@ const Header = () => {
           </a>
         </nav>
 
-        {/* Mobile Toggle */}
         <button className="lg:hidden text-white p-2" onClick={() => setIsOpen(!isOpen)}>
           {isOpen ? <X size={28} /> : <Menu size={28} />}
         </button>
       </div>
 
-      {/* Mobile Menu */}
       <AnimatePresence>
         {isOpen && (
           <motion.div

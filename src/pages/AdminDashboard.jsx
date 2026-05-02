@@ -51,8 +51,8 @@ export default function AdminDashboard() {
 
   function handleCard(rota, titulo) {
     if (titulo === 'Sair') {
-      encerrarSessao()       // limpa token, usuario e trocar_senha
-      navigate('/login')     // redireciona para login
+      encerrarSessao()       
+      navigate('/login')     
       return
     }
     if (rota) {
@@ -64,9 +64,6 @@ export default function AdminDashboard() {
     <div className="pt-32 pb-24 bg-white min-h-screen">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center mb-16">
-          {/* <span className="text-secondary font-bold uppercase tracking-widest text-sm mb-4 block">
-            Painel Administrativo
-          </span> */}
           <h1 className="text-4xl md:text-6xl font-serif text-primary mb-4">
             O que deseja fazer hoje?
           </h1>

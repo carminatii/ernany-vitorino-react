@@ -93,7 +93,6 @@ export default function PropertyList() {
   const [loading, setLoading] = useState(true)
   const [erro, setErro] = useState(null)
 
-  // inicializa filtros a partir dos query params da URL (vindos da SearchBar da Home)
   const [filters, setFilters] = useState(() => {
     const params = new URLSearchParams(location.search)
     return {
