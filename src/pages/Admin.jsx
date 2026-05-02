@@ -72,7 +72,7 @@ export default function Admin() {
           console.error("Erro ao carregar usuários:", err);
         });
     } else {
-      // se não for admin, garante que o corretor selecionado seja o próprio usuário
+      
       setCorretorSelecionado(usuarioId);
       setForm((prev) => ({ ...prev, corretor: usuarioId }));
     }
@@ -192,7 +192,7 @@ export default function Admin() {
                 value={form.nome}
                 onChange={handleChange}
                 placeholder="Ex.: Apartamento no Centro"
-                // required
+                
                 className="w-full bg-light p-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
               />
             </div>
@@ -207,7 +207,7 @@ export default function Admin() {
                   name="imagem"
                   value={form.imagem}
                   onChange={handleChange}
-                  placeholder="https://exemplo.com/foto.jpg"
+                  placeholder="https:foto.com/imovel.jpg"
                   className="w-full bg-light p-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
                 />
               ) : (
@@ -256,7 +256,7 @@ export default function Admin() {
                   name="tipo_imovel"
                   value={form.tipo_imovel}
                   onChange={handleChange}
-                  // required
+                  
                   className="w-full bg-light p-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
                 >
                   <option value="">Selecione</option>
@@ -275,7 +275,7 @@ export default function Admin() {
                   name="tipo"
                   value={form.tipo}
                   onChange={handleChange}
-                  // required
+                  
                   className="w-full bg-light p-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
                 >
                   <option value="venda">Venda</option>
@@ -293,7 +293,7 @@ export default function Admin() {
                     value={form.valor}
                     onChange={handleChange}
                     placeholder="Ex.: 350000"
-                    // required
+                    
                     min="0"
                     className="w-full bg-light p-3 pr-12 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
                   />

@@ -46,9 +46,9 @@ const Home = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            {/* <span className="text-secondary uppercase tracking-[0.3em] font-bold text-sm mb-6 block">
+            <span className="text-secondary uppercase tracking-[0.3em] font-bold text-sm mb-6 block">
               Especialista em Alto Padrão
-            </span> */}
+            </span>
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif text-white mb-8 leading-tight">
               Encontre seu lar ideal <br />
               <span className="text-secondary italic">em Guarapari</span>

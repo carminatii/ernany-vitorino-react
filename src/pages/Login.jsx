@@ -22,9 +22,7 @@ const Login = () => {
     setCarregando(true)
 
     try {
-      console.log('Login: enviando', { email: formData.email })
       const data = await loginUsuario(formData)
-      console.log('Login: resposta', data)
 
       // Extrai campos com fallback para diferentes formatos de backend
       const token = data.token ?? data.accessToken ?? data.data?.token
@@ -36,14 +34,10 @@ const Login = () => {
         throw new Error('Resposta do servidor inválida. Verifique o console (Network).')
       }
 
-      // normaliza o papel para evitar problemas de case
       if (usuario.papel) usuario.papel = String(usuario.papel).toLowerCase()
 
-      // Salva sessão (token, usuario, trocar_senha)
       salvarSessao(token, usuario, trocar_senha)
-      console.log('Sessão salva:', { usuario, trocar_senha })
 
-      // Redirecionamento por papel e flag trocar_senha
       if (trocar_senha) {
         navigate('/trocar-senha')
         return

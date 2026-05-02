@@ -23,7 +23,6 @@ export default function TrocarSenha() {
   const [sucesso, setSucesso] = useState(false)
 
   useEffect(() => {
-    // se não houver sessão, redireciona para login
     if (!sessao) {
       navigate('/login')
     }
@@ -60,27 +59,22 @@ export default function TrocarSenha() {
     setCarregando(true)
 
     try {
-      // envia para o backend; se backend não exigir senha_atual, passe undefined
       const senha_atual = form.senha_atual || undefined
       await trocarSenha(senha_atual, form.nova_senha)
 
-      // sucesso: encerra sessão e mostra mensagem antes de redirecionar
       encerrarSessao()
       setSucesso(true)
 
-      // aguarda um instante para o usuário ver a mensagem, depois vai para login
       setTimeout(() => {
         navigate('/login')
       }, 900)
     } catch (err) {
-      // mostra mensagem do backend quando disponível
       setErro(err?.message || 'Erro ao trocar senha. Tente novamente.')
     } finally {
       setCarregando(false)
     }
   }
 
-  // botão "Ir para o login" — type button evita submit acidental
   function handleIrParaLogin() {
     encerrarSessao()
     navigate('/login')

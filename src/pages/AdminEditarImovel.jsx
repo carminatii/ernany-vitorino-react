@@ -67,16 +67,21 @@ export default function AdminEditarImovel() {
           const dados = Array.isArray(lista)
             ? lista
             : (lista?.dados ?? lista ?? []);
+
           const apenasCorretores = dados.filter(
-            (u) => String(u.papel || "").toLowerCase() === "corretor",
+            (u) => ["corretor", "admin"].includes(String(u.papel || "").toLowerCase())
           );
+
           setCorretores(apenasCorretores);
+
+          if (!corretorSelecionado && apenasCorretores.length > 0) {
+            setCorretorSelecionado(String(apenasCorretores[0].id))
+          }
         })
         .catch((err) => {
           console.error("Erro ao carregar usuários:", err);
         });
     } else {
-      // se não for admin, garante que o corretor selecionado seja o próprio usuário
       setCorretorSelecionado(usuarioId);
       setForm((prev) => ({ ...prev, corretor: usuarioId }));
     }
@@ -88,16 +93,6 @@ export default function AdminEditarImovel() {
     if (name === 'imagem') setPreviewFoto(value)
   }
 
-  function handleUpload(e) {
-    const file = e.target.files[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = (ev) => {
-      setPreviewFoto(ev.target.result)
-      setForm(prev => ({ ...prev, imagem: ev.target.result }))
-    }
-    reader.readAsDataURL(file)
-  }
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -116,12 +111,9 @@ export default function AdminEditarImovel() {
       }
 
       if (papel === 'admin') {
-        if (String(form.corretor ?? '') !== String(corretorSelecionado ?? '')) {
-          payload.corretor =
-            corretorSelecionado === ''
-              ? Number(usuarioId)
-              : Number(corretorSelecionado)
-        }
+        payload.corretor = corretorSelecionado === ''
+          ? Number(usuarioId)
+          : Number(corretorSelecionado)
       }
 
       await updateImovel(id, payload)
@@ -184,7 +176,6 @@ export default function AdminEditarImovel() {
         <form onSubmit={handleSubmit}>
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-6">
 
-            {/* Nome */}
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">
                 Nome do imóvel <span className="text-red-500">*</span>
@@ -196,7 +187,6 @@ export default function AdminEditarImovel() {
               />
             </div>
 
-            {/* Imagem */}
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">Imagem do imóvel</label>
               <input
@@ -219,7 +209,6 @@ export default function AdminEditarImovel() {
               )}
             </div>
 
-            {/* Tipo, Finalidade e Valor */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">Tipo do imóvel *</label>
@@ -255,7 +244,6 @@ export default function AdminEditarImovel() {
               </div>
             </div>
 
-            {/* Quartos etc */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
                 { label: 'Quartos', name: 'quartos', icon: BedDouble },
@@ -275,15 +263,13 @@ export default function AdminEditarImovel() {
               ))}
             </div>
 
-            {/* Descrição */}
             <textarea name="descricao" value={form.descricao} onChange={handleChange}
               className="w-full bg-light p-3 rounded-xl" />
 
-            {/* Características */}
             <input type="text" name="caracteristicas" value={form.caracteristicas} onChange={handleChange}
               className="w-full bg-light p-3 rounded-xl" />
 
-            {/* 🔥 REGRA AQUI */}
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
               {papel === 'admin' && (
@@ -295,8 +281,6 @@ export default function AdminEditarImovel() {
                     value={corretorSelecionado ?? ''}
                     onChange={(e) => setCorretorSelecionado(e.target.value)}
                   >
-                    <option value="">Sem corretor</option>
-
                     {corretores.map(c => (
                       <option key={c.id} value={String(c.id)}>
                         {c.nome}
@@ -314,7 +298,6 @@ export default function AdminEditarImovel() {
               </div>
             </div>
 
-            {/* Botões */}
             <div className="flex justify-end gap-3 pt-2">
               <button type="button" onClick={() => navigate(`${prefixo}/imoveis`)}
                 className="px-6 py-3 rounded-xl border">

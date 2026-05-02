@@ -193,25 +193,6 @@ export default function PropertyDetail() {
                 </div>
               </div>
             )}
-
-            {/* Corretor */}
-            {/* {corretor && (
-              <div className="bg-light rounded-2xl p-6 flex items-center gap-4">
-                <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-secondary shrink-0">
-                  <img
-                    src={ernanyImg}
-                    alt={corretor}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">
-                    Corretor Responsável
-                  </p>
-                  <p className="text-lg font-serif font-bold text-primary">{corretor}</p>
-                </div>
-              </div>
-            )} */}
           </div>
 
           {/* Sidebar */}

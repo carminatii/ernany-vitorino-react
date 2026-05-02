@@ -12,19 +12,16 @@ export default function AdminImoveis() {
   const [confirmando, setConfirmando] = useState(null)
   const [buscaRef, setBuscaRef] = useState('')
 
-  // memoriza a sessão uma vez por montagem para evitar que o objeto mude a cada render
   const sessao = useMemo(() => getSessao(), [])
   const papel = String(sessao?.usuario?.papel || '').toLowerCase()
   const prefixo = papel === 'admin' ? '/admin' : '/corretor'
 
   useEffect(() => {
-    // se não houver sessão, redireciona (PrivateRoute já protege, mas deixamos a checagem)
     if (!sessao) {
       navigate('/login')
       return
     }
 
-    // normaliza papel e id (valores primitivos)
     const papel = String(sessao.usuario?.papel || '').toLowerCase()
     const usuarioId = sessao.usuario?.id
 
@@ -47,8 +44,7 @@ export default function AdminImoveis() {
     }
 
     carregar()
-    // dependências: apenas navigate (não sessao) — sessao foi memorizada
-  }, [navigate, sessao]) // sessao é estável por useMemo
+  }, [navigate, sessao]) 
 
   async function handleExcluir(id) {
     try {
@@ -73,13 +69,11 @@ export default function AdminImoveis() {
     </div>
   )
 
-  // helper para checar se o usuário atual pode editar/deletar o imóvel
   const podeEditarOuDeletar = (item) => {
     if (!sessao || !sessao.usuario) return false
     const papel = String(sessao.usuario.papel || '').toLowerCase()
     const usuarioId = String(sessao.usuario.id)
     if (papel === 'admin') return true
-    // corretor_id é o ID original do corretor salvo no banco
     if (item.corretor_id && String(item.corretor_id) === usuarioId) return true
     return false
   }
@@ -151,12 +145,7 @@ export default function AdminImoveis() {
                   <div className="flex-1 min-w-0">
                     <h3 className="text-lg font-serif font-bold text-primary truncate">{item.nome}</h3>
                     <p className="text-sm text-gray-500 mt-1">{item.localizacao} - {item.referencia} </p>
-                    {/* {item.referencia && (
-                      <span className="inline-block mt-1 text-xs font-mono text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
-                        {item.referencia}
-                      </span>
-                    )} */}
-                    {/* <p className="text-sm text-gray-400 mt-1"> */}
+          
                     <p>
                       {Number(item.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                     </p>

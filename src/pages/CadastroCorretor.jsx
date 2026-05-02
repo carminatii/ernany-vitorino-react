@@ -112,19 +112,8 @@ const CadastroCorretor = () => {
                   </div>
                 </div>
 
-                {/* <button
-                  onClick={() => {
-                    setSenhaGerada(null)
-                    setFormData({ nome: '', email: '', celular: '' })
-                  }}
-                  className="w-full bg-primary text-white font-bold py-3 rounded-xl hover:bg-secondary hover:text-primary transition-all"
-                >
-                  CADASTRAR OUTRO CORRETOR
-                </button> */}
-
                 <button
                   onClick={() => navigate('/admin')}
-                  // className="w-full border border-gray-200 text-gray-500 font-bold py-3 rounded-xl hover:bg-light transition-colors"
                   className="w-full bg-primary text-white font-bold py-3 rounded-xl hover:bg-secondary hover:text-primary transition-all"
                 >
                   Voltar ao Dashboard
