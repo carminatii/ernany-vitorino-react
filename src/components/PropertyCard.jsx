@@ -53,13 +53,20 @@ const PropertyCard = ({ property }) => {
       {/* Conteúdo */}
       <div className="p-6">
         <div className="mb-4">
-          <h3 className="text-xl font-serif font-bold text-dark group-hover:text-secondary transition-colors line-clamp-1">
-            {nome}
-          </h3>
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="text-xl font-serif font-bold text-dark group-hover:text-secondary transition-colors line-clamp-1">
+              {nome}
+            </h3>
+            {referencia && (
+              <span className="text-gray-400 text-xs font-mono bg-light px-3 py-1 rounded-full border border-gray-200 whitespace-nowrap shrink-0">
+                {referencia}
+              </span>
+            )}
+          </div>
           {localizacao && (
             <p className="text-gray-500 text-sm flex items-center gap-1 mt-1">
               <MapPin size={12} className="text-secondary shrink-0" />
-              {localizacao} - {referencia}
+              {localizacao} 
             </p>
           )}
         </div>

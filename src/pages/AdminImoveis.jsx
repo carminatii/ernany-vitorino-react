@@ -143,8 +143,15 @@ export default function AdminImoveis() {
                   />
 
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-serif font-bold text-primary truncate">{item.nome}</h3>
-                    <p className="text-sm text-gray-500 mt-1">{item.localizacao} - {item.referencia} </p>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="text-lg font-serif font-bold text-primary truncate">{item.nome}</h3>
+                      {item.referencia && (
+                        <span className="text-gray-400 text-xs font-mono bg-white px-3 py-1 rounded-full border border-gray-200 whitespace-nowrap shrink-0">
+                          {item.referencia}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-500 mt-1">{item.localizacao}</p>
           
                     <p>
                       {Number(item.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}

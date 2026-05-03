@@ -137,7 +137,7 @@ const Home = () => {
                   </span>
                   <br />
                   <span className="text-2xl text-gray-400 font-sans font-light">
-                    Perito Avaliador de Imóveis - CNAE 7120-2/00
+                    Perito Avaliador de Imóveis - CNAI 48482
                   </span>
                 </h2>
                 <p className="text-gray-600 leading-relaxed text-lg">
