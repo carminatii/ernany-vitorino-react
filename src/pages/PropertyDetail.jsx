@@ -114,11 +114,16 @@ export default function PropertyDetail() {
   )
 
   const {
-    nome, imagem, tipo, valor, quartos,
+    nome, imagens, imagem, tipo, valor, quartos,
     banheiros, tamanho, vagas,
     descricao, caracteristicas, corretor,
     localizacao, referencia
   } = property
+
+  // Normaliza as imagens: prioriza o array 'imagens', se não houver, usa 'imagem' (legado)
+  const listaImagens = Array.isArray(imagens) && imagens.length > 0 
+    ? imagens 
+    : (imagem ? [imagem] : [])
 
   const caracteristicasList = caracteristicas
     ? caracteristicas.split(',').map(c => c.trim()).filter(Boolean)
@@ -131,11 +136,11 @@ export default function PropertyDetail() {
   return (
     <div className="pt-20 bg-white">
 
-      {/* Galeria — usa imagem da API, com fallback */}
+      {/* Galeria — usa imagens da API, com fallback */}
       <section className="relative h-[60vh] md:h-[80vh]">
-        {imagem ? (
+        {listaImagens.length > 0 ? (
           <SliderComponent {...sliderSettings} className="h-full">
-            {[imagem].map((foto, index) => (
+            {listaImagens.map((foto, index) => (
               <div key={index} className="h-[60vh] md:h-[80vh] outline-none">
                 <img
                   src={foto}

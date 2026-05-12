@@ -19,7 +19,6 @@ export default function AdminEditarImovel() {
   const prefixo = papel === 'admin' ? '/admin' : '/corretor'
 
   const [form, setForm] = useState(null)
-  const [previewFoto, setPreviewFoto] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [sucesso, setSucesso] = useState(false)
   const [erro, setErro] = useState('')
@@ -45,7 +44,7 @@ export default function AdminEditarImovel() {
           caracteristicas: data.caracteristicas ?? '',
           corretor: data.corretor ?? '',
           localizacao: data.localizacao ?? '',
-          imagem: data.imagem ?? '',
+          imagens: Array.isArray(data.imagens) ? data.imagens : (data.imagem ? [data.imagem] : []),
         })
 
         setCorretorSelecionado(
@@ -53,8 +52,6 @@ export default function AdminEditarImovel() {
             ? String(data.corretor)
             : ''
         )
-
-        setPreviewFoto(data.imagem ?? '')
       })
       .catch(() => setErro('Não foi possível carregar os dados do imóvel.'))
       .finally(() => setLoading(false))
@@ -90,7 +87,34 @@ export default function AdminEditarImovel() {
   function handleChange(e) {
     const { name, value } = e.target
     setForm(prev => ({ ...prev, [name]: value }))
-    if (name === 'imagem') setPreviewFoto(value)
+  }
+
+  function handleUpload(e) {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+
+    if (form.imagens.length + files.length > 20) {
+      setErro("Você pode enviar no máximo 20 fotos por imóvel.");
+      return;
+    }
+
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        setForm((prev) => ({ 
+          ...prev, 
+          imagens: [...prev.imagens, ev.target.result] 
+        }));
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function handleRemoveFoto(index) {
+    setForm(prev => ({
+      ...prev,
+      imagens: prev.imagens.filter((_, i) => i !== index)
+    }));
   }
 
 
@@ -188,23 +212,45 @@ export default function AdminEditarImovel() {
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">Imagem do imóvel</label>
-              <input
-                type="url" name="imagem" value={form.imagem} onChange={handleChange}
-                placeholder="https://exemplo.com/foto.jpg"
-                className="w-full bg-light p-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary mb-3"
-              />
+              <label className="block text-sm font-bold text-gray-700 mb-2">
+                Fotos do imóvel (Máximo 20)
+              </label>
+              
+              <label className="block border-2 border-dashed border-gray-200 rounded-xl p-8 text-center cursor-pointer hover:border-secondary transition-colors mb-4">
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleUpload}
+                  className="hidden"
+                />
+                <Image size={32} className="text-gray-300 mx-auto mb-2" />
+                <p className="text-sm text-gray-400">
+                  Clique para selecionar fotos (Até 20)
+                </p>
+              </label>
 
-              {previewFoto && (
-                <div className="relative">
-                  <img src={previewFoto} alt="Preview"
-                    className="w-full h-48 object-cover rounded-xl"
-                    onError={() => setPreviewFoto('')} />
-                  <button type="button"
-                    onClick={() => { setPreviewFoto(''); setForm(prev => ({ ...prev, imagem: '' })) }}
-                    className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70">
-                    <X size={14} />
-                  </button>
+              {form.imagens && form.imagens.length > 0 && (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
+                  {form.imagens.map((foto, index) => (
+                    <div key={index} className="relative group aspect-square">
+                      <img
+                        src={foto}
+                        alt={`Preview ${index + 1}`}
+                        className="w-full h-full object-cover rounded-xl border border-gray-100"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveFoto(index)}
+                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-red-600"
+                      >
+                        <X size={14} />
+                      </button>
+                      <div className="absolute bottom-2 left-2 bg-black/50 text-white text-[10px] px-2 py-0.5 rounded-full">
+                        {index + 1}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
