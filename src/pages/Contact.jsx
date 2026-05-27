@@ -113,7 +113,8 @@ const Contact = () => {
               <h3 className="text-xl font-serif font-bold text-primary">E-mail</h3>
               <p className="text-gray-500">
                 {config?.email1 || '—'}<br />
-                {/* {config?.email2 || ''} */}
+                {/* deixar comentado se tiver um segundo email remover */}
+                {/* {config?.email2 || ''}  */}
               </p>
             </div>
 
