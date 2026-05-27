@@ -1,15 +1,13 @@
 import React, { useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { getImoveis, deleteImovel } from '../services/imovelService'
+import { deleteImovel } from '../services/imovelService'
 import { Pencil, Trash2, ArrowLeft, Home, ChevronLeft, ChevronRight } from 'lucide-react'
 import { getSessao } from '../services/authService'
+import { useFetchImoveis } from '../hooks/useFetchImoveis'
 
 export default function AdminImoveis() {
   const navigate = useNavigate()
-  const [imoveis, setImoveis] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [erro, setErro] = useState(null)
   const [confirmando, setConfirmando] = useState(null)
   const [buscaRef, setBuscaRef] = useState('')
   const [pagina, setPagina] = useState(1)
@@ -21,35 +19,11 @@ export default function AdminImoveis() {
   const papel = String(sessao?.usuario?.papel || '').toLowerCase()
   const prefixo = papel === 'admin' ? '/admin' : '/corretor'
 
-  useEffect(() => {
-    if (!sessao) {
-      navigate('/login')
-      return
-    }
-
-    const papel = String(sessao.usuario?.papel || '').toLowerCase()
-    const usuarioId = sessao.usuario?.id
-
-    setLoading(true)
-    setErro(null)
-
-    const carregar = async () => {
-      try {
-        const dados = papel === 'corretor'
-          ? await getImoveis({ corretorId: usuarioId })
-          : await getImoveis()
-        setImoveis(dados || [])
-      } catch (e) {
-        setErro(papel === 'corretor'
-          ? 'Não foi possível carregar os imóveis do corretor.'
-          : 'Não foi possível carregar os imóveis.')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    carregar()
-  }, [navigate, sessao]) 
+  const fetchParams = useMemo(
+    () => papel === 'corretor' ? { corretorId: sessao?.usuario?.id } : undefined,
+    [papel, sessao]
+  )
+  const { imoveis, setImoveis, loading, erro } = useFetchImoveis(fetchParams)
 
   async function handleExcluir(id) {
     try {
