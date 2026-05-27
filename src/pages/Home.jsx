@@ -170,19 +170,22 @@ const Home = () => {
                 ))}
               </div>
 
-              <Link
-                to="/contato"
-                className="inline-block bg-primary text-white px-10 py-4 rounded-xl font-bold hover:bg-secondary hover:text-primary transition-all shadow-xl shadow-primary/10"
-              >
-                AGENDE UMA CONSULTORIA
-              </Link>
+              <div className="flex justify-center">
+                <Link
+                  to="/contato"
+                  className="inline-block bg-primary text-white px-10 py-4 rounded-xl font-bold hover:bg-secondary hover:text-primary transition-all shadow-xl shadow-primary/10"
+                >
+                  AGENDE UMA CONSULTORIA
+                </Link>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* CTA */}
-      <section className="py-24 bg-secondary relative overflow-hidden">
+       {/* ja tem mt informacao de contato na mesma pagina redundancia total  */}
+      {/* <section className="py-24 bg-secondary relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/3 h-full opacity-10 pointer-events-none">
           <svg viewBox="0 0 100 100" className="w-full h-full">
             <path d="M0,0 L100,0 L100,100 Z" fill="white" />
@@ -214,7 +217,7 @@ const Home = () => {
             </Link>
           </div>
         </div>
-      </section>
+      </section> */}
     </div>
   )
 }
