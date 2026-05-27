@@ -78,7 +78,7 @@ function obterNomeCorretor(property) {
 function validarFormularioContato(formData) {
   const errors = {}
 
-  if (!formData.nome.trim()) errors.nome = 'Este campo é obrigatório'
+  if (!formData.nome.trim()) errors.nome = 'Digite o seu nome para continuar.'
 
   return errors
 }

@@ -12,7 +12,7 @@ const WhatsAppButton = () => {
   const numero = formatarWhatsApp(config?.telefone1)
   if (!numero) return null
 
-  const message = encodeURIComponent('Olá, tenho interesse em um imóvel.')
+  const message = encodeURIComponent('Olá, tudo bem? Tenho interesse em saber mais sobre os imóveis disponíveis. Poderia me passar mais informações?')
   const whatsappUrl = `https://wa.me/${numero}?text=${message}`
 
   return (
