@@ -127,9 +127,9 @@ export default function AdminEditarImovel() {
 
       const extras = papel === 'admin'
         ? {
-            corretor: corretorSelecionado === ''
-              ? Number(usuarioId)
-              : Number(corretorSelecionado)
+            corretor: corretorSelecionado !== ''
+              ? Number(corretorSelecionado)
+              : undefined
           }
         : {}
 
