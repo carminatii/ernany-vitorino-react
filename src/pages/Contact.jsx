@@ -1,8 +1,6 @@
 import React, { useState } from 'react'
 import { MapPin, Phone, Mail, Instagram, Facebook, MessageCircle } from 'lucide-react'
-import toast from 'react-hot-toast'
 import { useConfig } from '../context/ConfigContext'
-import { enviarContato } from '../services/contatoService'
 import { formatPhoneBR } from '../utils/phone'
 
 function validarFormularioContato(formData) {
@@ -44,7 +42,6 @@ const Contact = () => {
   const config = useConfig()
   const [formData, setFormData] = useState(camposIniciais)
   const [formErrors, setFormErrors] = useState({})
-  const [carregando, setCarregando] = useState(false)
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -60,25 +57,26 @@ const Contact = () => {
     setFormErrors(prev => ({ ...prev, [name]: errors[name] || '' }))
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
 
     const errors = validarFormularioContato(formData)
     setFormErrors(errors)
-
     if (Object.keys(errors).length > 0) return
 
-    setCarregando(true)
-    try {
-      await enviarContato(formData)
-      toast.success('Mensagem enviada! Em breve entraremos em contato.')
-      setFormData(camposIniciais)
-      setFormErrors({})
-    } catch (err) {
-      toast.error(err.message)
-    } finally {
-      setCarregando(false)
-    }
+    const raw = config?.telefone1?.replace(/\D/g, '')
+    const numero = raw ? (raw.startsWith('55') ? raw : `55${raw}`) : null
+    if (!numero) return
+
+    const texto = encodeURIComponent(
+      `Olá! Me chamo ${formData.nome.trim()}.\n` +
+      `E-mail: ${formData.email.trim()}\n` +
+      `Telefone: ${formData.telefone.trim()}\n` +
+      `Assunto: ${formData.assunto}\n\n` +
+      formData.mensagem.trim()
+    )
+
+    window.open(`https://wa.me/${numero}?text=${texto}`, '_blank', 'noopener,noreferrer')
   }
 
   const fieldClass = (name) => `${inputBaseClass} ${formErrors[name] ? 'border-red-400' : 'border-gray-200'}`
@@ -247,9 +245,9 @@ const Contact = () => {
                 )}
               </div>
 
-              <button type="submit" disabled={carregando}
-                className="w-full bg-primary text-white font-bold py-5 rounded-xl hover:bg-secondary hover:text-primary transition-all shadow-xl shadow-primary/10 uppercase tracking-widest text-sm disabled:opacity-60">
-                {carregando ? 'Enviando...' : 'Enviar Mensagem'}
+              <button type="submit"
+                className="w-full bg-primary text-white font-bold py-5 rounded-xl hover:bg-secondary hover:text-primary transition-all shadow-xl shadow-primary/10 uppercase tracking-widest text-sm">
+                Enviar pelo WhatsApp
               </button>
             </form>
           </div>
