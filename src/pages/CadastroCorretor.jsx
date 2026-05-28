@@ -160,8 +160,8 @@ const CadastroCorretor = () => {
                     <p className="font-medium mb-1">Como funciona:</p>
                     <ul className="text-xs space-y-1 list-disc list-inside">
                       <li>Uma senha temporária será gerada</li>
-                      <li>As credenciais são enviadas por e-mail ao corretor</li>
-                      <li>Ele altera a senha no primeiro login</li>
+                      <li>A senha temporária será enviada no e-mail do corretor</li>
+                      <li>Ele deve alterar a senha no primeiro login obrigatóriamente</li>
                     </ul>
                   </div>
 
