@@ -35,3 +35,12 @@ export async function enviarNovaSenha(id) {
     throw new Error(err.response?.data?.erro || 'Erro ao enviar nova senha.')
   }
 }
+
+export async function deletarCorretor(id) {
+  try {
+    const { data } = await api.delete(`/admin/corretores/${id}`)
+    return data
+  } catch (err) {
+    throw new Error(err.response?.data?.erro || 'Erro ao deletar corretor.')
+  }
+}

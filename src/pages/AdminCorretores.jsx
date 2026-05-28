@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Mail, Phone, User, Pencil, KeyRound, X, Check, UserPlus } from 'lucide-react'
+import { ArrowLeft, Mail, Phone, User, Pencil, KeyRound, X, Check, UserPlus, Trash2, AlertTriangle } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { atualizarCorretor, enviarNovaSenha } from '../services/corretorService'
+import { atualizarCorretor, enviarNovaSenha, deletarCorretor } from '../services/corretorService'
 import { formatPhoneBR } from '../utils/phone'
 import { useCorretores } from '../hooks/useCorretores'
 import { useForm } from '../hooks/useForm'
@@ -149,11 +149,60 @@ function ModalEditar({ corretor, onClose, onSalvo }) {
   )
 }
 
+function ModalConfirmarDelete({ corretor, onClose, onConfirmar, deletando }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+      <div className="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
+              <AlertTriangle size={20} className="text-red-500" />
+            </div>
+            <h2 className="text-2xl font-serif text-primary">Deletar Corretor</h2>
+          </div>
+          <button onClick={onClose} className="text-gray-400 hover:text-primary transition-colors">
+            <X size={22} />
+          </button>
+        </div>
+
+        <p className="text-gray-600 mb-3">
+          Tem certeza que deseja deletar <strong className="text-primary">{corretor.nome}</strong>?
+        </p>
+        <p className="text-sm text-gray-500 mb-6">
+          Todos os imóveis vinculados a este corretor serão transferidos automaticamente para você.
+          Esta ação não pode ser desfeita.
+        </p>
+
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={deletando}
+            className="flex-1 border border-gray-200 text-gray-500 font-bold py-3.5 rounded-xl hover:bg-light transition-colors text-sm uppercase tracking-widest disabled:opacity-60"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            onClick={onConfirmar}
+            disabled={deletando}
+            className="flex-1 bg-red-500 text-white font-bold py-3.5 rounded-xl hover:bg-red-600 transition-all text-sm uppercase tracking-widest disabled:opacity-60 flex items-center justify-center gap-2"
+          >
+            {deletando ? 'Deletando...' : (<><Trash2 size={15} /> Deletar</>)}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function AdminCorretores() {
   const navigate = useNavigate()
   const { corretores, setCorretores, carregando } = useCorretores()
   const [editando, setEditando] = useState(null)
   const [enviandoSenha, setEnviandoSenha] = useState(null)
+  const [confirmandoDelete, setConfirmandoDelete] = useState(null)
+  const [deletando, setDeletando] = useState(false)
 
   async function handleNovaSenha(corretor) {
     setEnviandoSenha(corretor.id)
@@ -164,6 +213,26 @@ export default function AdminCorretores() {
       toast.error(err.message)
     } finally {
       setEnviandoSenha(null)
+    }
+  }
+
+  async function handleConfirmarDelete() {
+    if (!confirmandoDelete) return
+    setDeletando(true)
+    try {
+      const res = await deletarCorretor(confirmandoDelete.id)
+      setCorretores(prev => prev.filter(c => c.id !== confirmandoDelete.id))
+      const transferidos = res?.imoveis_transferidos ?? 0
+      toast.success(
+        transferidos > 0
+          ? `${confirmandoDelete.nome} deletado. ${transferidos} imóvel(eis) transferido(s) para você.`
+          : `${confirmandoDelete.nome} deletado com sucesso.`
+      )
+      setConfirmandoDelete(null)
+    } catch (err) {
+      toast.error(err.message)
+    } finally {
+      setDeletando(false)
     }
   }
 
@@ -277,6 +346,14 @@ export default function AdminCorretores() {
                       </>
                     )}
                   </button>
+                  <button
+                    onClick={() => setConfirmandoDelete(corretor)}
+                    className="flex items-center gap-2 border border-red-200 text-red-500 hover:bg-red-50 hover:border-red-400 font-bold px-4 py-2.5 rounded-xl transition-all text-sm"
+                    title="Deletar corretor"
+                  >
+                    <Trash2 size={15} />
+                    <span className="hidden sm:inline">Deletar</span>
+                  </button>
                 </div>
               </div>
             ))}
@@ -289,6 +366,15 @@ export default function AdminCorretores() {
           corretor={editando}
           onClose={() => setEditando(null)}
           onSalvo={handleSalvo}
+        />
+      )}
+
+      {confirmandoDelete && (
+        <ModalConfirmarDelete
+          corretor={confirmandoDelete}
+          onClose={() => !deletando && setConfirmandoDelete(null)}
+          onConfirmar={handleConfirmarDelete}
+          deletando={deletando}
         />
       )}
     </div>
