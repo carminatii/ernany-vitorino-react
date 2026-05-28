@@ -209,12 +209,12 @@ export default function AdminCorretores() {
         ) : corretores.length === 0 ? (
           <div className="max-w-md mx-auto text-center py-24">
             <p className="text-gray-400 text-sm">Nenhum corretor cadastrado ainda.</p>
-            <button
+            {/* <button
               onClick={() => navigate('/cadastro-corretor')}
               className="mt-6 bg-primary text-white font-bold px-8 py-3 rounded-xl hover:bg-secondary hover:text-primary transition-all text-sm uppercase tracking-widest"
             >
               Cadastrar primeiro corretor
-            </button>
+            </button> */}
           </div>
         ) : (
           <div className="max-w-4xl mx-auto space-y-4">

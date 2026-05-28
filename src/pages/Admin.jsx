@@ -40,16 +40,17 @@ export default function Admin() {
           const dados = Array.isArray(lista)
             ? lista
             : (lista?.dados ?? lista ?? []);
-          const apenasCorretores = dados.filter(
-            (u) => String(u.papel || "").toLowerCase() === "corretor",
+          // Inclui corretores E admins (papel admin pode ser responsável por imóvel).
+          // Exclui o próprio usuário logado para não duplicar com a opção "atribuir a mim".
+          const elegiveis = dados.filter(
+            (u) => String(u.id) !== usuarioId,
           );
-          setCorretores(apenasCorretores);
+          setCorretores(elegiveis);
         })
         .catch((err) => {
           console.error("Erro ao carregar usuários:", err);
         });
     } else {
-      
       setCorretorSelecionado(usuarioId);
       setForm((prev) => ({ ...prev, corretor: usuarioId }));
     }
@@ -79,8 +80,12 @@ export default function Admin() {
         tamanho: form.tamanho ? Number(form.tamanho) : undefined,
         vagas: form.vagas ? Number(form.vagas) : undefined,
       };
+      // Sempre envia ID explícito (string). Nunca omite, nunca envia null/NaN.
+      // Admin sem seleção → próprio admin. Corretor → sempre ele mesmo.
       const extras = {
-        corretor: papel === 'corretor' ? usuarioId : (corretorSelecionado?.trim() || null),
+        corretor: papel === 'corretor'
+          ? usuarioId
+          : (corretorSelecionado?.trim() || usuarioId),
       };
       await createImovel(montarFormDataImovel(payload, extras));
       aoSucesso();
@@ -332,8 +337,7 @@ export default function Admin() {
                     }}
                     className="w-full bg-light p-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
                   >
-                    {/* <option value="">Ficar comigo (admin)</option> */}
-                    <option value="">{nomeUsuario}</option>
+                    <option value="">— Sem corretor (atribuir a {nomeUsuario}) —</option>
                     {corretores.map(c => (
                       <option key={c.id} value={String(c.id)}>
                         {c.nome}

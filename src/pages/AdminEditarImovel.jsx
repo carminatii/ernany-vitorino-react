@@ -29,8 +29,10 @@ export default function AdminEditarImovel() {
       try {
         const data = await getImovelById(id)
 
-        const corretorDoImovel = data.corretor != null && data.corretor !== ''
-          ? String(data.corretor)
+        // Backend retorna `corretor` = nome (JOIN) e `corretor_id` = ID.
+        // Usar SEMPRE corretor_id para o select.
+        const corretorDoImovel = data.corretor_id != null
+          ? String(data.corretor_id)
           : ''
 
         setForm({
@@ -45,7 +47,7 @@ export default function AdminEditarImovel() {
           vagas: data.vagas ?? '',
           descricao: data.descricao ?? '',
           caracteristicas: data.caracteristicas ?? '',
-          corretor: data.corretor ?? '',
+          corretor: data.corretor_id ?? '',
           localizacao: data.localizacao ?? '',
           imagens: (Array.isArray(data.imagens) ? data.imagens : (data.imagem ? [data.imagem] : []))
             .map(criarItemImagemExistente),
@@ -54,9 +56,7 @@ export default function AdminEditarImovel() {
         if (papel === 'admin') {
           const lista = await getCorretores()
           setCorretores(lista)
-          setCorretorSelecionado(
-            corretorDoImovel || (lista.length > 0 ? String(lista[0].id) : '')
-          )
+          setCorretorSelecionado(corretorDoImovel || '')
         } else {
           setCorretorSelecionado(usuarioId)
           setForm(prev => ({ ...prev, corretor: usuarioId }))
@@ -84,9 +84,15 @@ export default function AdminEditarImovel() {
         tamanho: form.tamanho ? parseFloat(form.tamanho) : undefined,
         vagas: form.vagas ? parseInt(form.vagas) : undefined,
       }
-      const extras = papel === 'admin'
-        ? { corretor: corretorSelecionado !== '' ? Number(corretorSelecionado) : undefined }
-        : {}
+      // Sempre envia corretor explicitamente (defensivo):
+      // - admin sem seleção → próprio admin
+      // - admin com seleção → corretor escolhido
+      // - corretor (qualquer cenário) → ele mesmo
+      const extras = {
+        corretor: papel === 'admin'
+          ? (corretorSelecionado?.trim() || usuarioId)
+          : usuarioId,
+      }
       await updateImovel(id, montarFormDataImovel(payload, extras))
       aoSucesso()
       window.scrollTo(0, 0)
@@ -266,9 +272,11 @@ export default function AdminEditarImovel() {
                     Corretor responsável
                   </label>
                   <select
-                    value={corretorSelecionado ?? ''}
+                    value={corretorSelecionado}
                     onChange={(e) => setCorretorSelecionado(e.target.value)}
+                    className="w-full bg-light p-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
                   >
+                    {/* <option value="">— Sem corretor (atribuir ao admin) —</option> */}
                     {corretores.map(c => (
                       <option key={c.id} value={String(c.id)}>
                         {c.nome}
