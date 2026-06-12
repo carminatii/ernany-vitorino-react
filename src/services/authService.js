@@ -31,10 +31,16 @@ export function salvarSessao(usuario, trocar_senha) {
  * dispara encerrarSessao() via interceptor de api.js.
  */
 export function getSessao() {
-  const usuario = JSON.parse(localStorage.getItem('usuario') || 'null')
-  const trocarSenha = localStorage.getItem('trocar_senha') === 'true'
-  if (!usuario) return null
-  return { usuario, trocar_senha: trocarSenha }
+  try {
+    const usuario = JSON.parse(localStorage.getItem('usuario') || 'null')
+    const trocarSenha = localStorage.getItem('trocar_senha') === 'true'
+    if (!usuario) return null
+    return { usuario, trocar_senha: trocarSenha }
+  } catch {
+    localStorage.removeItem('usuario')
+    localStorage.removeItem('trocar_senha')
+    return null
+  }
 }
 
 export function encerrarSessao() {

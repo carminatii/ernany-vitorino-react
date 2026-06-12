@@ -103,6 +103,8 @@ export default function PropertyDetail() {
   const [whatsappError, setWhatsappError] = useState('')
 
   useEffect(() => {
+    let cancelled = false
+
     setLoading(true)
     setErro('')
     setFotoAtual(0)
@@ -110,12 +112,22 @@ export default function PropertyDetail() {
 
     getImovelById(id)
       .then(async (data) => {
+        if (cancelled) return
         setProperty(data)
-        const todos = await getImoveis(data.tipo)
+        const todos = await getImoveis({ tipo: data.tipo, limit: 4 })
+        if (cancelled) return
         setSimilares(todos.filter(item => item.id !== data.id).slice(0, 3))
       })
-      .catch(() => setErro('Imóvel não encontrado.'))
-      .finally(() => setLoading(false))
+      .catch(() => {
+        if (!cancelled) setErro('Imóvel não encontrado.')
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
   }, [id])
 
   useEffect(() => {
