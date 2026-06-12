@@ -102,7 +102,7 @@ const Home = () => {
       <section id="sobre" className="py-24 bg-white relative overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div className="relative group">
+            <div className="relative group mx-auto w-full" style={{maxWidth: '39rem'}}>
               <div className="aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl bg-white p-3 border border-gray-100 relative z-10">
                 <div className="w-full h-full rounded-2xl overflow-hidden bg-gray-50">
                   <img
@@ -169,6 +169,7 @@ const Home = () => {
           </div>
         </div>
       </section>
+
     </div>
   )
 }
