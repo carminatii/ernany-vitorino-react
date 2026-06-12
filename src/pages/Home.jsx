@@ -6,6 +6,7 @@ import PropertyCard from '../components/PropertyCard'
 import { getImoveis } from '../services/imovelService'
 import SearchBar from '../components/SearchBar'
 import ernanyImg from '../assets/ernany.jpeg'
+import principalImg from '../assets/principal.png'
 
 const Home = () => {
   const navigate = useNavigate()
@@ -30,7 +31,7 @@ const Home = () => {
       <section className="relative h-screen flex items-center justify-center pt-20">
         <div className="absolute inset-0 z-0">
           <img
-            src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1920&q=80"
+            src={principalImg}
             alt="Luxury Real Estate"
             className="w-full h-full object-cover"
           />
@@ -120,7 +121,7 @@ const Home = () => {
               </div>
             </div>
 
-            <div className="space-y-8 lg:col-span-2 max-w-2xl mx-auto w-full">
+            <div className="space-y-8 max-w-2xl mx-auto w-full">
               <div>
                 <span className="text-secondary font-bold uppercase tracking-widest text-sm mb-4 block">
                   Sobre Mim

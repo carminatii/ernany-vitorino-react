@@ -1,13 +1,16 @@
 import React from 'react'
 import { Navigation } from 'lucide-react'
 import Map from '../components/Map'
+import imobilImg1 from '../assets/imobilimage1.jpeg'
+import imobilImg2 from '../assets/imobilimage2.jpeg'
+import imobilImg3 from '../assets/imobilimage3.jpeg'
 
 const COORDS = { lat: -20.6750, lng: -40.5007 }
 
 const fotos = [
-  'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=800&q=80',
+  imobilImg1,
+  imobilImg2,
+  imobilImg3
 ]
 
 export default function Localizacao() {
